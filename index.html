@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise AI Capital Allocation Decision Engine</title>
+  
+  <!-- Open Graph Meta Tags for LinkedIn Sharing Previews -->
+  <meta property="og:title" content="AI Capital Allocation Decision Engine" />
+  <meta property="og:description" content="Evaluate enterprise AI initiatives using corporate finance fundamentals: NPV, ROIC, and Staged Gating." />
+  <meta property="og:type" content="website" />
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 24px; line-height: 1.5; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    
+    header { margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
+    h1 { font-size: 1.5rem; font-weight: 700; }
+    .subtitle { color: var(--text-muted); font-size: 0.875rem; margin-top: 4px; }
+    .badge { background: #1e3a8a; color: #93c5fd; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; border: 1px solid #3b82f6; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 24px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+    .card-title { font-size: 1rem; font-weight: 600; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; color: #e2e8f0; }
+
+    .form-group { margin-bottom: 16px; }
+    label { display: flex; justify-content: space-between; font-size: 0.825rem; font-weight: 500; margin-bottom: 6px; color: var(--text-muted); align-items: center; }
+    .val-display { color: var(--text); font-weight: 600; }
+    
+    input[type="text"], select, input[type="number"] {
+      width: 100%; padding: 8px 12px; background: #0f172a; border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 0.875rem; outline: none;
+    }
+    input[type="range"] { width: 100%; accent-color: var(--primary); cursor: pointer; }
+    
+    /* TOOLTIP STYLES */
+    .tooltip-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      cursor: help;
+      border-bottom: 1px dotted #60a5fa;
+      color: #e2e8f0;
+    }
+    .tooltip-wrap .tooltip-text {
+      visibility: hidden;
+      opacity: 0;
+      width: 260px;
+      background-color: #020617;
+      color: #f1f5f9;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 400;
+      line-height: 1.35;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+      position: absolute;
+      z-index: 100;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: opacity 0.2s ease, visibility 0.2s ease;
+      pointer-events: none;
+    }
+    .tooltip-wrap .tooltip-text::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #020617 transparent transparent transparent;
+    }
+    .tooltip-wrap:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .verdict-box { border-radius: 8px; padding: 16px; margin-bottom: 20px; border-left: 5px solid; transition: all 0.2s ease; }
+    .verdict-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .verdict-desc { font-size: 0.825rem; }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .kpi-card { background: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+    .kpi-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .kpi-val { font-size: 1.25rem; font-weight: 700; margin-top: 6px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: right; }
+    th, td { padding: 8px 10px; border: 1px solid var(--border); }
+    th { background: #0f172a; color: var(--text-muted); font-weight: 600; text-align: right; }
+    th:first-child, td:first-child { text-align: left; }
+    .highlight-cell { outline: 2px solid var(--primary); font-weight: 700; }
+
+    .pos { color: var(--success); }
+    .neg { color: var(--danger); }
+
+    .footer { text-align: center; margin-top: 40px; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 16px; }
+    .share-btn { background: #0a66c2; color: #fff; padding: 8px 14px; border-radius: 6px; border: none; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-size: 0.825rem; }
+    .share-btn:hover { background: #004182; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <h1>Enterprise AI Capital Allocation Decision Engine</h1>
+      <p class="subtitle">Evaluate projects against ROIC, WACC, cash conversion, and staged-funding gates.</p>
+    </div>
+    <span class="badge">© 2026 Sateesh Bolloju</span>
+  </header>
+
+  <div class="grid">
+    <!-- LEFT COLUMN: INPUTS -->
+    <div>
+      <div class="card">
+        <div class="card-title">1. Project & Lifecycle Investment</div>
+        
+        <div class="form-group">
+          <label>Project Name</label>
+          <input type="text" id="projectName" value="Clinical Workflow Copilot" />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="tooltip-wrap">Stage-Gate Stage
+              <span class="tooltip-text">A governance mechanism releasing funding in tranches (Discovery ➔ Pilot ➔ Production ➔ Scale) based on validated technical & financial milestones.</span>
+            </span>
+          </label>
+          <select id="stage" onchange="calculate()">
+            <option value="Discovery">Discovery / Feasibility</option>
+            <option value="Pilot" selected>Pilot / Prototype</option>
+            <option value="Production">Production Rollout</option>
+            <option value="Scale">Enterprise Scale</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="tooltip-wrap">Upfront CapEx / Build Budget ($)
+              <span class="tooltip-text"><strong>Capital Expenditures (CapEx):</strong> Upfront capital invested in initial model fine-tuning, data pipeline integration, architecture setup, and system engineering.</span>
+            </span>
+            <span class="val-display" id="capexDisplay">$250,000</span>
+          </label>
+          <input type="range" id="capex" min="25000" max="1000000" step="25000" value="250000" oninput="updateValues()" />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="tooltip-wrap">Annual Run OpEx / Maintenance ($)
+              <span class="tooltip-text"><strong>Operating Expenses (OpEx):</strong> Recurring annual cash costs including GPU compute, token API licenses, data pipeline curation, continuous compliance, and model maintenance.</span>
+            </span>
+            <span class="val-display" id="opexDisplay">$80,000</span>
+          </label>
+          <input type="range" id="opex" min="10000" max="400000" step="5000" value="80000" oninput="updateValues()" />
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">2. Value Capture & Cost of Capital</div>
+
+        <div class="form-group">
+          <label>
+            <span class="tooltip-wrap">Projected Annual Gross Value ($)
+              <span class="tooltip-text"><strong>Gross Value:</strong> The unadjusted estimated annual financial benefit (headcount hours saved, manual task reductions, or projected revenue increase).</span>
+            </span>
+            <span class="val-display" id="benefitDisplay">$280,000</span>
+          </label>
+          <input type="range" id="benefit" min="50000" max="1000000" step="25000" value="280000" oninput="updateValues()" />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="tooltip-wrap">Hard Cash Realization Rate (%)
+              <span class="tooltip-text"><strong>Hard Cash Realization:</strong> The fraction of theoretical saved time converted into real P&L cash (e.g. direct vendor reduction or new billable capacity) rather than 'productivity theater'.</span>
+            </span>
+            <span class="val-display" id="realizationDisplay">65%</span>
+          </label>
+          <input type="range" id="realization" min="20" max="100" step="5" value="65" oninput="updateValues()" />
+        </div>
+
+        <div class="form-group">
+          <label>
+            <span class="tooltip-wrap">Hurdle Rate / WACC (%)
+              <span class="tooltip-text"><strong>Hurdle Rate (Weighted Average Cost of Capital):</strong> The minimum rate of return an enterprise requires to justify committing capital to a project over alternative investments.</span>
+            </span>
+            <span class="val-display" id="waccDisplay">10%</span>
+          </label>
+          <input type="range" id="wacc" min="4" max="18" step="1" value="10" oninput="updateValues()" />
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: RESULTS & SENSITIVITY -->
+    <div>
+      <div id="verdictBox" class="verdict-box">
+        <div id="verdictTitle" class="verdict-title">--</div>
+        <div id="verdictDesc" class="verdict-desc">--</div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-label">
+            <span class="tooltip-wrap">3-Yr Net Present Value
+              <span class="tooltip-text"><strong>NPV:</strong> The present value of all future realized net cash flows minus initial CapEx, discounted at the enterprise Hurdle Rate. Must be > $0 to create shareholder value.</span>
+            </span>
+          </div>
+          <div class="kpi-val" id="npvVal">--</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">
+            <span class="tooltip-wrap">Return on Capital (ROIC)
+              <span class="tooltip-text"><strong>ROIC:</strong> Net annual operating cash flow generated divided by upfront invested capital. Must exceed the Hurdle Rate / WACC.</span>
+            </span>
+          </div>
+          <div class="kpi-val" id="roicVal">--</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-label">
+            <span class="tooltip-wrap">Payback Period
+              <span class="tooltip-text"><strong>Payback Period:</strong> The time (in years) required for cumulative realized hard cash inflows to fully recover the initial upfront CapEx outlay.</span>
+            </span>
+          </div>
+          <div class="kpi-val" id="paybackVal">--</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">2-Way Sensitivity Matrix (NPV vs. Hurdle & Realization)</div>
+        <table id="sensitivityTable">
+          <thead>
+            <tr>
+              <th>WACC \ Realization</th>
+              <th>35%</th>
+              <th>50%</th>
+              <th>65%</th>
+              <th>80%</th>
+              <th>95%</th>
+            </tr>
+          </thead>
+          <tbody id="sensitivityBody"></tbody>
+        </table>
+      </div>
+
+      <div class="card" style="text-align: center;">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Share your thoughts or feedback on this framework with the community:</p>
+        <a class="share-btn" href="https://www.linkedin.com" target="_blank">Share Feedback on LinkedIn</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Enterprise AI Capital Allocation Framework • Grounded in ROIC, WACC, and Staged-Gated Governance.
+  </div>
+</div>
+
+<script>
+  function formatMoney(num) {
+    return (num < 0 ? "-$" : "$") + Math.abs(Math.round(num)).toLocaleString();
+  }
+
+  function updateValues() {
+    document.getElementById('capexDisplay').innerText = formatMoney(document.getElementById('capex').value);
+    document.getElementById('opexDisplay').innerText = formatMoney(document.getElementById('opex').value);
+    document.getElementById('benefitDisplay').innerText = formatMoney(document.getElementById('benefit').value);
+    document.getElementById('realizationDisplay').innerText = document.getElementById('realization').value + "%";
+    document.getElementById('waccDisplay').innerText = document.getElementById('wacc').value + "%";
+    calculate();
+  }
+
+  function calculate() {
+    const capex = parseFloat(document.getElementById('capex').value);
+    const opex = parseFloat(document.getElementById('opex').value);
+    const benefit = parseFloat(document.getElementById('benefit').value);
+    const realization = parseFloat(document.getElementById('realization').value) / 100;
+    const wacc = parseFloat(document.getElementById('wacc').value) / 100;
+
+    // 3-Year Cash Flows
+    const netCash1 = (benefit * realization) - opex;
+    const netCash2 = (benefit * 1.15 * realization) - (opex * 1.05);
+    const netCash3 = (benefit * 1.30 * realization) - (opex * 1.10);
+
+    const npv = -capex + (netCash1 / (1 + wacc)**1) + (netCash2 / (1 + wacc)**2) + (netCash3 / (1 + wacc)**3);
+    const roic = (netCash1 / capex) * 100;
+    const payback = netCash1 > 0 ? (capex / netCash1).toFixed(1) + " yrs" : "> 4.0 yrs";
+
+    // Update KPI Displays
+    const npvEl = document.getElementById('npvVal');
+    npvEl.innerText = formatMoney(npv);
+    npvEl.className = 'kpi-val ' + (npv >= 0 ? 'pos' : 'neg');
+
+    const roicEl = document.getElementById('roicVal');
+    roicEl.innerText = roic.toFixed(1) + "%";
+    roicEl.className = 'kpi-val ' + (roic >= wacc * 100 ? 'pos' : 'neg');
+
+    document.getElementById('paybackVal').innerText = payback;
+
+    // Verdict Logic
+    const verdictBox = document.getElementById('verdictBox');
+    const verdictTitle = document.getElementById('verdictTitle');
+    const verdictDesc = document.getElementById('verdictDesc');
+
+    if (npv > 0 && roic >= (wacc * 100 + 5) && realization >= 0.5) {
+      verdictBox.style.background = 'rgba(16, 185, 129, 0.15)';
+      verdictBox.style.borderColor = 'var(--success)';
+      verdictTitle.style.color = 'var(--success)';
+      verdictTitle.innerText = 'APPROVED TO ADVANCE';
+      verdictDesc.innerText = 'The initiative clears enterprise hurdle rates and demonstrates hard P&L cash conversion. Commit funding to the next staged milestone.';
+    } else if (npv > 0 && realization < 0.5) {
+      verdictBox.style.background = 'rgba(245, 158, 11, 0.15)';
+      verdictBox.style.borderColor = 'var(--warning)';
+      verdictTitle.style.color = 'var(--warning)';
+      verdictTitle.innerText = 'HOLD: RE-EVALUATE VALUE CAPTURE';
+      verdictDesc.innerText = 'High risk of productivity theater (<50% cash conversion). Re-architect value attribution to prove hard cost reduction or new billing capacity.';
+    } else {
+      verdictBox.style.background = 'rgba(239, 68, 68, 0.15)';
+      verdictBox.style.borderColor = 'var(--danger)';
+      verdictTitle.style.color = 'var(--danger)';
+      verdictTitle.innerText = 'TERMINATE / SUNK COST AVOIDANCE';
+      verdictDesc.innerText = 'Negative risk-adjusted NPV. Ongoing run and integration costs exceed defensible cash returns. Do not release additional capital tranches.';
+    }
+
+    renderSensitivity(capex, opex, benefit);
+  }
+
+  function renderSensitivity(capex, opex, benefit) {
+    const waccRates = [0.06, 0.08, 0.10, 0.12, 0.14];
+    const realRates = [0.35, 0.50, 0.65, 0.80, 0.95];
+    const currentWacc = parseFloat(document.getElementById('wacc').value) / 100;
+    const currentReal = parseFloat(document.getElementById('realization').value) / 100;
+
+    let tbodyHtml = '';
+    waccRates.forEach(w => {
+      tbodyHtml += `<tr><td><strong>${(w * 100)}%</strong></td>`;
+      realRates.forEach(r => {
+        const n1 = (benefit * r) - opex;
+        const n2 = (benefit * 1.15 * r) - (opex * 1.05);
+        const n3 = (benefit * 1.30 * r) - (opex * 1.10);
+        const cellNpv = -capex + (n1 / (1 + w)**1) + (n2 / (1 + w)**2) + (n3 / (1 + w)**3);
+        const isHighlight = Math.abs(w - currentWacc) < 0.01 && Math.abs(r - currentReal) < 0.07;
+        const cellClass = (cellNpv >= 0 ? 'pos' : 'neg') + (isHighlight ? ' highlight-cell' : '');
+        tbodyHtml += `<td class="${cellClass}">${formatMoney(cellNpv)}</td>`;
+      });
+      tbodyHtml += `</tr>`;
+    });
+    document.getElementById('sensitivityBody').innerHTML = tbodyHtml;
+  }
+
+  window.onload = updateValues;
+</script>
+</body>
+</html>
