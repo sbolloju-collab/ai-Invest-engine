@@ -39,6 +39,7 @@
     .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 8px; overflow-x: auto; }
     .tab-btn { background: transparent; border: 1px solid transparent; color: var(--text-muted); padding: 8px 16px; border-radius: 6px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
     .tab-btn:hover { color: var(--text); background: #1e293b; }
+    .tab-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
     .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
     .tab-content { display: none; }
@@ -129,7 +130,7 @@
     .calc-row { display: flex; justify-content: space-between; font-size: 0.825rem; padding: 4px 0; border-bottom: 1px dashed #1e293b; }
     .calc-row:last-child { border-bottom: none; font-weight: 700; color: #60a5fa; }
 
-    .scenario-pill-group { display: flex; gap: 8px; margin-bottom: 16px; }
+    .scenario-pill-group { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
     .scenario-pill { padding: 6px 12px; font-size: 0.775rem; border-radius: 6px; border: 1px solid var(--border); background: var(--card-sub); color: var(--text-muted); cursor: pointer; }
     .scenario-pill.active { border-color: var(--primary); color: #fff; background: #1e3a8a; font-weight: 600; }
 
@@ -169,22 +170,22 @@
     </div>
   </header>
 
-  <!-- NAVIGATION TABS -->
-  <div class="tabs" role="tablist">
-    <button class="tab-btn active" role="tab" id="tabBtnDashboard" aria-selected="true" aria-controls="tab-dashboard">📊 1. Decision Dashboard</button>
-    <button class="tab-btn" role="tab" id="tabBtnEstimators" aria-selected="false" aria-controls="tab-estimators">🧮 2. Non-Finance Cost & Value Estimator</button>
-    <button class="tab-btn" role="tab" id="tabBtnBuildbuy" aria-selected="false" aria-controls="tab-buildbuy">⚖️ 3. Build vs. Buy Analysis</button>
-    <button class="tab-btn" role="tab" id="tabBtnAssumptions" aria-selected="false" aria-controls="tab-assumptions">⚙️ 4. Model Assumptions & Scenarios</button>
+  <!-- ACCESSIBLE TAB NAVIGATION -->
+  <div class="tabs" role="tablist" aria-label="Investment Decision Sections">
+    <button class="tab-btn active" role="tab" id="tabBtnDashboard" aria-selected="true" aria-controls="tab-dashboard" tabindex="0">📊 1. Decision Dashboard</button>
+    <button class="tab-btn" role="tab" id="tabBtnEstimators" aria-selected="false" aria-controls="tab-estimators" tabindex="-1">🧮 2. Non-Finance Cost & Value Estimator</button>
+    <button class="tab-btn" role="tab" id="tabBtnBuildbuy" aria-selected="false" aria-controls="tab-buildbuy" tabindex="-1">⚖️ 3. Build vs. Buy Analysis</button>
+    <button class="tab-btn" role="tab" id="tabBtnAssumptions" aria-selected="false" aria-controls="tab-assumptions" tabindex="-1">⚙️ 4. Model Assumptions & Scenarios</button>
   </div>
 
   <!-- TAB 1: EXECUTIVE DECISION DASHBOARD -->
-  <div id="tab-dashboard" class="tab-content active" role="tabpanel">
+  <div id="tab-dashboard" class="tab-content active" role="tabpanel" aria-labelledby="tabBtnDashboard">
     
     <div class="scenario-pill-group">
       <span style="font-size:0.8rem; color:var(--text-muted); align-self:center; margin-right:4px;">Quick Scenario:</span>
-      <button class="scenario-pill active" id="scenBase" onclick="loadScenario('base')">Base Case</button>
-      <button class="scenario-pill" id="scenCons" onclick="loadScenario('conservative')">Conservative / Downside</button>
-      <button class="scenario-pill" id="scenAggr" onclick="loadScenario('aggressive')">Aggressive / Scale</button>
+      <button class="scenario-pill active" id="scenBase">Base Case</button>
+      <button class="scenario-pill" id="scenCons">Conservative / Downside</button>
+      <button class="scenario-pill" id="scenAggr">Aggressive / Scale</button>
     </div>
 
     <div class="grid">
@@ -320,7 +321,7 @@
   </div>
 
   <!-- TAB 2: NON-FINANCE ESTIMATOR WIZARD -->
-  <div id="tab-estimators" class="tab-content" role="tabpanel">
+  <div id="tab-estimators" class="tab-content" role="tabpanel" aria-labelledby="tabBtnEstimators">
     <div class="grid">
       <div>
         <div class="card">
@@ -401,7 +402,7 @@
   </div>
 
   <!-- TAB 3: BUILD VS BUY DECISION -->
-  <div id="tab-buildbuy" class="tab-content" role="tabpanel">
+  <div id="tab-buildbuy" class="tab-content" role="tabpanel" aria-labelledby="tabBtnBuildbuy">
     <div class="grid">
       <div class="card">
         <div class="card-title">Option A: Build In-House (Custom Model / Pipeline)</div>
@@ -480,7 +481,7 @@
   </div>
 
   <!-- TAB 4: MODEL ASSUMPTIONS & SCENARIOS -->
-  <div id="tab-assumptions" class="tab-content" role="tabpanel">
+  <div id="tab-assumptions" class="tab-content" role="tabpanel" aria-labelledby="tabBtnAssumptions">
     <div class="card">
       <div class="card-title">Auditable Model Growth & Inflation Constants</div>
       <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 16px;">Configure dynamic scaling curves across adoption expansion and operational infrastructure indexing.</p>
@@ -518,6 +519,16 @@
 <script>
   'use strict';
 
+  // State cache to eliminate fragile DOM scraping
+  const modelState = {
+    npv: 0,
+    roic: 0,
+    paybackYears: 0,
+    paybackFormatted: '--'
+  };
+
+  let autoSaveTimer = null;
+
   function safeNumber(val, fallback = 0, min = 0, max = Infinity) {
     const num = Number(val);
     if (!Number.isFinite(num)) return fallback;
@@ -548,22 +559,6 @@
     if (el) el.style.display = 'none';
   }
 
-  function switchTab(evt, tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => {
-      el.classList.remove('active');
-      el.setAttribute('aria-selected', 'false');
-    });
-    
-    const target = document.getElementById(tabId);
-    if (target) target.classList.add('active');
-    
-    if (evt && evt.currentTarget) {
-      evt.currentTarget.classList.add('active');
-      evt.currentTarget.setAttribute('aria-selected', 'true');
-    }
-  }
-
   function getModelAssumptions() {
     return {
       benefitY2: safeNumber(document.getElementById('paramBenefitY2')?.value, 1.15, 1.0, 3.0),
@@ -573,9 +568,11 @@
     };
   }
 
-  // Monthly Granular Payback Calculation
+  // Refactored Payback Function returning structured { formatted, years }
   function calcPrecisePayback(capex, cashFlows) {
-    if (capex <= 0) return "0 mos (0.0 yrs)";
+    if (capex <= 0) {
+      return { formatted: "0 mos (0.0 yrs)", years: 0 };
+    }
     let cum = 0;
     for (let i = 0; i < cashFlows.length; i++) {
       const cf = cashFlows[i];
@@ -588,12 +585,15 @@
         const totalMonths = Math.round(totalYears * 12);
         const y = Math.floor(totalMonths / 12);
         const m = totalMonths % 12;
-        if (y === 0) return `${m} mos (${totalYears.toFixed(1)} yrs)`;
-        if (m === 0) return `${y} yr${y > 1 ? 's' : ''} (${totalYears.toFixed(1)} yrs)`;
-        return `${y} yr${y > 1 ? 's' : ''} ${m} mo${m > 1 ? 's' : ''} (${totalYears.toFixed(1)} yrs)`;
+        let formatted = '';
+        if (y === 0) formatted = `${m} mos (${totalYears.toFixed(1)} yrs)`;
+        else if (m === 0) formatted = `${y} yr${y > 1 ? 's' : ''} (${totalYears.toFixed(1)} yrs)`;
+        else formatted = `${y} yr${y > 1 ? 's' : ''} ${m} mo${m > 1 ? 's' : ''} (${totalYears.toFixed(1)} yrs)`;
+        
+        return { formatted, years: totalYears };
       }
     }
-    return `> ${cashFlows.length} yrs`;
+    return { formatted: `> ${cashFlows.length} yrs (No Payback)`, years: Number.POSITIVE_INFINITY };
   }
 
   function calculate() {
@@ -616,9 +616,15 @@
       const npv = -capex + (netCash1 / Math.pow(1 + wacc, 1)) + (netCash2 / Math.pow(1 + wacc, 2)) + (netCash3 / Math.pow(1 + wacc, 3));
       const avgNetCash = (netCash1 + netCash2 + netCash3) / 3;
       const roic = capex > 0 ? (avgNetCash / capex) * 100 : 0;
-      const payback = calcPrecisePayback(capex, cashFlows);
+      const paybackRes = calcPrecisePayback(capex, cashFlows);
 
-      // DOM Updates
+      // Cache clean numeric state
+      modelState.npv = npv;
+      modelState.roic = roic;
+      modelState.paybackYears = paybackRes.years;
+      modelState.paybackFormatted = paybackRes.formatted;
+
+      // Update DOM
       const npvEl = document.getElementById('npvVal');
       if (npvEl) {
         npvEl.textContent = formatMoney(npv);
@@ -632,9 +638,9 @@
       }
 
       const paybackEl = document.getElementById('paybackVal');
-      if (paybackEl) paybackEl.textContent = payback;
+      if (paybackEl) paybackEl.textContent = paybackRes.formatted;
 
-      // Dynamic Verdict Logic with Buy / Build Awareness
+      // Dynamic Verdict Logic
       const verdictBox = document.getElementById('verdictBox');
       const verdictTitle = document.getElementById('verdictTitle');
       const verdictDesc = document.getElementById('verdictDesc');
@@ -698,7 +704,6 @@
         const td = document.createElement('td');
         td.textContent = formatMoney(cellNpv);
 
-        // Strict nearest distance selection
         const isHighlight = Math.abs(w - currentWacc) < 0.015 && Math.abs(r - currentReal) < 0.075;
         td.className = (cellNpv >= 0 ? 'pos' : 'neg') + (isHighlight ? ' highlight-cell' : '');
         tr.appendChild(td);
@@ -744,7 +749,6 @@
     }
   }
 
-  // Estimator Syncs to Dashboard and Build vs Buy
   function applyEstimatesToDashboard() {
     const devMonths = safeNumber(document.getElementById('estDevMonths')?.value, 0);
     const consulting = safeNumber(document.getElementById('estConsulting')?.value, 0);
@@ -783,15 +787,10 @@
     updateFromSlider('benefit');
     updateFromSlider('realization');
 
-    switchTab(null, 'tab-dashboard');
-    const dashBtn = document.getElementById('tabBtnDashboard');
-    if (dashBtn) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      dashBtn.classList.add('active');
-    }
+    selectTab(document.getElementById('tabBtnDashboard'));
   }
 
-  // Build vs Buy with Independent Benefit Streams
+  // Build vs Buy with Fixed Payback Numeric Logic
   function runBuildBuy() {
     try {
       const bCapex = safeNumber(document.getElementById('bbBuildCapex')?.value, 260000);
@@ -810,7 +809,6 @@
       const tcoBuild = bCapex + (bOpex * 1.0) + (bOpex * p.opexY2) + (bOpex * p.opexY3);
       const tcoBuy = buyCapex + (buyOpex * 1.0) + (buyOpex * p.opexY2) + (buyOpex * p.opexY3);
 
-      // Independent benefit cash flows
       const bNet1 = (baseBenefit * 1.00 * realization * bRealMult) - (bOpex * 1.00);
       const bNet2 = (baseBenefit * p.benefitY2 * realization * bRealMult) - (bOpex * p.opexY2);
       const bNet3 = (baseBenefit * p.benefitY3 * realization * bRealMult) - (bOpex * p.opexY3);
@@ -821,8 +819,8 @@
       const buyNet3 = (baseBenefit * p.benefitY3 * realization * buyRealMult) - (buyOpex * p.opexY3);
       const npvBuy = -buyCapex + (buyNet1 / Math.pow(1 + wacc, 1)) + (buyNet2 / Math.pow(1 + wacc, 2)) + (buyNet3 / Math.pow(1 + wacc, 3));
 
-      const payBuild = calcPrecisePayback(bCapex, [bNet1, bNet2, bNet3]);
-      const payBuy = calcPrecisePayback(buyCapex, [buyNet1, buyNet2, buyNet3]);
+      const payBuildRes = calcPrecisePayback(bCapex, [bNet1, bNet2, bNet3]);
+      const payBuyRes = calcPrecisePayback(buyCapex, [buyNet1, buyNet2, buyNet3]);
 
       const tcoBuildEl = document.getElementById('bbTcoBuild');
       const tcoBuyEl = document.getElementById('bbTcoBuy');
@@ -847,12 +845,13 @@
       const payBuildEl = document.getElementById('bbPayBuild');
       const payBuyEl = document.getElementById('bbPayBuy');
       const advPayEl = document.getElementById('bbAdvPay');
-      if (payBuildEl) payBuildEl.textContent = payBuild;
-      if (payBuyEl) payBuyEl.textContent = payBuy;
+      if (payBuildEl) payBuildEl.textContent = payBuildRes.formatted;
+      if (payBuyEl) payBuyEl.textContent = payBuyRes.formatted;
+      
+      // Strict Numeric Comparison on .years property
       if (advPayEl) {
-        const pBuildNum = parseFloat(payBuild.replace(/[^0-9.]/g, '')) || 99;
-        const pBuyNum = parseFloat(payBuy.replace(/[^0-9.]/g, '')) || 99;
-        advPayEl.textContent = pBuildNum <= pBuyNum ? "Build In-House" : "Buy Commercial";
+        advPayEl.textContent = payBuildRes.years <= payBuyRes.years ? "Build In-House" : "Buy Commercial";
+        advPayEl.className = payBuildRes.years <= payBuyRes.years ? "pos" : "neg";
       }
 
       const vTitle = document.getElementById('bbVerdictTitle');
@@ -871,7 +870,7 @@
     }
   }
 
-  // Scenario Management
+  // Scenario Manager
   function loadScenario(type) {
     document.querySelectorAll('.scenario-pill').forEach(p => p.classList.remove('active'));
     
@@ -915,7 +914,21 @@
       }
     }
     calculate();
-    autoSave();
+    debouncedAutoSave();
+  }
+
+  // Debounced Auto-Save
+  function debouncedAutoSave() {
+    const toggle = document.getElementById('autoSaveToggle');
+    if (!toggle || !toggle.checked) return;
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+      try {
+        localStorage.setItem('ai_invest_engine_data', JSON.stringify(getPayload()));
+      } catch (e) {
+        console.warn('Storage quota exceeded or unavailable', e);
+      }
+    }, 400);
   }
 
   function getPayload() {
@@ -928,20 +941,11 @@
       benefitRaw: safeNumber(document.getElementById('benefit')?.value, 234000),
       realizationRaw: safeNumber(document.getElementById('realization')?.value, 70),
       waccRaw: safeNumber(document.getElementById('wacc')?.value, 10),
-      npvRaw: parseFloat(document.getElementById('npvVal')?.textContent.replace(/[^0-9.-]/g, '')) || 0,
-      roicRaw: parseFloat(document.getElementById('roicVal')?.textContent.replace(/[^0-9.-]/g, '')) || 0,
-      paybackFormatted: document.getElementById('paybackVal')?.textContent || '--'
+      npvRaw: modelState.npv,
+      roicRaw: modelState.roic,
+      paybackFormatted: modelState.paybackFormatted,
+      paybackYears: modelState.paybackYears
     };
-  }
-
-  function autoSave() {
-    const toggle = document.getElementById('autoSaveToggle');
-    if (!toggle || !toggle.checked) return;
-    try {
-      localStorage.setItem('ai_invest_engine_data', JSON.stringify(getPayload()));
-    } catch (e) {
-      console.warn('Storage quota exceeded or unavailable', e);
-    }
   }
 
   function saveToStorage() {
@@ -1013,8 +1017,8 @@
         ['Projected Annual Gross Value ($)', p.benefitRaw],
         ['Hard Cash Realization Rate (%)', p.realizationRaw],
         ['Enterprise Hurdle Rate / WACC (%)', p.waccRaw],
-        ['3-Year Net Present Value (NPV $)', p.npvRaw],
-        ['Average ROIC (%)', p.roicRaw],
+        ['3-Year Net Present Value (NPV $)', p.npvRaw.toFixed(2)],
+        ['Average ROIC (%)', p.roicRaw.toFixed(2)],
         ['Cumulative Payback Horizon', `"${p.paybackFormatted}"`]
       ];
       const csvContent = 'data:text/csv;charset=utf-8,' + csvRows.map(e => e.join(',')).join('\n');
@@ -1030,21 +1034,70 @@
     }
   }
 
+  // Accessible Tab Keyboard Navigation
+  function selectTab(tabBtn) {
+    if (!tabBtn) return;
+    const targetPanelId = tabBtn.getAttribute('aria-controls');
+    
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-selected', 'false');
+      btn.setAttribute('tabindex', '-1');
+    });
+
+    document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
+
+    tabBtn.classList.add('active');
+    tabBtn.setAttribute('aria-selected', 'true');
+    tabBtn.setAttribute('tabindex', '0');
+    tabBtn.focus();
+
+    const panel = document.getElementById(targetPanelId);
+    if (panel) panel.classList.add('active');
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
 
-    // Tabs
-    document.getElementById('tabBtnDashboard')?.addEventListener('click', (e) => switchTab(e, 'tab-dashboard'));
-    document.getElementById('tabBtnEstimators')?.addEventListener('click', (e) => switchTab(e, 'tab-estimators'));
-    document.getElementById('tabBtnBuildbuy')?.addEventListener('click', (e) => switchTab(e, 'tab-buildbuy'));
-    document.getElementById('tabBtnAssumptions')?.addEventListener('click', (e) => switchTab(e, 'tab-assumptions'));
+    // Tab Event Bindings & ARIA Keyboard Handling
+    const tabList = document.querySelector('.tabs');
+    const tabs = Array.from(document.querySelectorAll('.tab-btn'));
 
-    // Dashboard Inputs
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => selectTab(tab));
+
+      tab.addEventListener('keydown', (e) => {
+        let nextIndex = index;
+        if (e.key === 'ArrowRight') {
+          nextIndex = (index + 1) % tabs.length;
+          e.preventDefault();
+        } else if (e.key === 'ArrowLeft') {
+          nextIndex = (index - 1 + tabs.length) % tabs.length;
+          e.preventDefault();
+        } else if (e.key === 'Home') {
+          nextIndex = 0;
+          e.preventDefault();
+        } else if (e.key === 'End') {
+          nextIndex = tabs.length - 1;
+          e.preventDefault();
+        }
+        if (nextIndex !== index) {
+          selectTab(tabs[nextIndex]);
+        }
+      });
+    });
+
+    // Scenario Buttons
+    document.getElementById('scenBase')?.addEventListener('click', () => loadScenario('base'));
+    document.getElementById('scenCons')?.addEventListener('click', () => loadScenario('conservative'));
+    document.getElementById('scenAggr')?.addEventListener('click', () => loadScenario('aggressive'));
+
+    // Dashboard Slider & Text Inputs
     ['capex', 'opex', 'benefit', 'realization', 'wacc'].forEach(id => {
       document.getElementById(id)?.addEventListener('input', () => updateFromSlider(id));
     });
-    document.getElementById('projectName')?.addEventListener('input', () => { calculate(); autoSave(); });
-    document.getElementById('stage')?.addEventListener('change', () => { calculate(); autoSave(); });
+    document.getElementById('projectName')?.addEventListener('input', () => { calculate(); debouncedAutoSave(); });
+    document.getElementById('stage')?.addEventListener('change', () => { calculate(); debouncedAutoSave(); });
 
     // Estimators
     ['estDevMonths', 'estConsulting', 'estDataPipelines', 'estUsers', 'estCostPerUser', 'estAdminOpex', 'estEmpCount', 'estHoursSaved', 'estHourlyWage', 'estCaptureType'].forEach(id => {
@@ -1063,14 +1116,14 @@
       document.getElementById(id)?.addEventListener('input', calculate);
     });
 
-    // Actions
+    // Header Actions
     document.getElementById('btnSave')?.addEventListener('click', saveToStorage);
     document.getElementById('btnClear')?.addEventListener('click', clearStorage);
     document.getElementById('btnExportJSON')?.addEventListener('click', exportJSON);
     document.getElementById('btnExportCSV')?.addEventListener('click', exportCSV);
     document.getElementById('btnPrint')?.addEventListener('click', () => window.print());
 
-    // Initialize
+    // Initial Execution
     ['capex', 'opex', 'benefit', 'realization', 'wacc'].forEach(id => updateFromSlider(id));
     runEstimators();
   });
