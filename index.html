@@ -514,7 +514,6 @@
 <script>
   'use strict';
 
-  // State cache to eliminate fragile DOM scraping
   const modelState = {
     npv: 0,
     roic: 0,
@@ -563,7 +562,6 @@
     };
   }
 
-  // Refactored Payback Function returning structured { formatted, years }
   function calcPrecisePayback(capex, cashFlows) {
     if (capex <= 0) {
       return { formatted: "0 mos (0.0 yrs)", years: 0 };
@@ -613,13 +611,11 @@
       const roic = capex > 0 ? (avgNetCash / capex) * 100 : 0;
       const paybackRes = calcPrecisePayback(capex, cashFlows);
 
-      // Cache clean numeric state
       modelState.npv = npv;
       modelState.roic = roic;
       modelState.paybackYears = paybackRes.years;
       modelState.paybackFormatted = paybackRes.formatted;
 
-      // Update DOM
       const npvEl = document.getElementById('npvVal');
       if (npvEl) {
         npvEl.textContent = formatMoney(npv);
@@ -635,7 +631,6 @@
       const paybackEl = document.getElementById('paybackVal');
       if (paybackEl) paybackEl.textContent = paybackRes.formatted;
 
-      // Dynamic Verdict Logic
       const verdictBox = document.getElementById('verdictBox');
       const verdictTitle = document.getElementById('verdictTitle');
       const verdictDesc = document.getElementById('verdictDesc');
@@ -669,7 +664,6 @@
     }
   }
 
-  // Strict Sensitivity Cell Highlighting
   function renderSensitivity(capex, opex, benefit, p) {
     const tbody = document.getElementById('sensitivityBody');
     if (!tbody) return;
@@ -708,7 +702,6 @@
     });
   }
 
-  // Non-Finance Estimator Module
   function runEstimators() {
     try {
       const devMonths = safeNumber(document.getElementById('estDevMonths')?.value, 0);
@@ -744,7 +737,6 @@
     }
   }
 
-  // Estimator Syncs to Dashboard and Build vs Buy
   function applyEstimatesToDashboard() {
     const devMonths = safeNumber(document.getElementById('estDevMonths')?.value, 0);
     const consulting = safeNumber(document.getElementById('estConsulting')?.value, 0);
@@ -772,7 +764,6 @@
     if (benIn) benIn.value = Math.min(1000000, Math.max(50000, grossVal));
     if (realIn) realIn.value = realRate;
 
-    // Direct Sync to Build vs. Buy Tab
     const bbBuildCap = document.getElementById('bbBuildCapex');
     const bbBuildOp = document.getElementById('bbBuildOpex');
     if (bbBuildCap) bbBuildCap.value = totalCapex;
@@ -786,7 +777,6 @@
     selectTab(document.getElementById('tabBtnDashboard'));
   }
 
-  // Build vs Buy with Fixed Payback Numeric Logic
   function runBuildBuy() {
     try {
       const bCapex = safeNumber(document.getElementById('bbBuildCapex')?.value, 260000);
@@ -844,7 +834,6 @@
       if (payBuildEl) payBuildEl.textContent = payBuildRes.formatted;
       if (payBuyEl) payBuyEl.textContent = payBuyRes.formatted;
       
-      // Strict Numeric Comparison on .years property
       if (advPayEl) {
         advPayEl.textContent = payBuildRes.years <= payBuyRes.years ? "Build In-House" : "Buy Commercial";
         advPayEl.className = payBuildRes.years <= payBuyRes.years ? "pos" : "neg";
@@ -866,7 +855,6 @@
     }
   }
 
-  // Scenario Manager
   function loadScenario(type) {
     document.querySelectorAll('.scenario-pill').forEach(p => p.classList.remove('active'));
     
@@ -913,7 +901,6 @@
     debouncedAutoSave();
   }
 
-  // Debounced Auto-Save
   function debouncedAutoSave() {
     const toggle = document.getElementById('autoSaveToggle');
     if (!toggle || !toggle.checked) return;
@@ -1030,7 +1017,6 @@
     }
   }
 
-  // Accessible Tab Keyboard Navigation
   function selectTab(tabBtn) {
     if (!tabBtn) return;
     const targetPanelId = tabBtn.getAttribute('aria-controls');
@@ -1055,7 +1041,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
 
-    // Tab Event Bindings & ARIA Keyboard Handling
     const tabList = document.querySelector('.tabs');
     const tabs = Array.from(document.querySelectorAll('.tab-btn'));
 
@@ -1083,43 +1068,36 @@
       });
     });
 
-    // Scenario Buttons
     document.getElementById('scenBase')?.addEventListener('click', () => loadScenario('base'));
     document.getElementById('scenCons')?.addEventListener('click', () => loadScenario('conservative'));
     document.getElementById('scenAggr')?.addEventListener('click', () => loadScenario('aggressive'));
 
-    // Dashboard Slider & Text Inputs
     ['capex', 'opex', 'benefit', 'realization', 'wacc'].forEach(id => {
       document.getElementById(id)?.addEventListener('input', () => updateFromSlider(id));
     });
     document.getElementById('projectName')?.addEventListener('input', () => { calculate(); debouncedAutoSave(); });
     document.getElementById('stage')?.addEventListener('change', () => { calculate(); debouncedAutoSave(); });
 
-    // Estimators
     ['estDevMonths', 'estConsulting', 'estDataPipelines', 'estUsers', 'estCostPerUser', 'estAdminOpex', 'estEmpCount', 'estHoursSaved', 'estHourlyWage', 'estCaptureType'].forEach(id => {
       document.getElementById(id)?.addEventListener('input', runEstimators);
       document.getElementById(id)?.addEventListener('change', runEstimators);
     });
     document.getElementById('btnApplyEstimates')?.addEventListener('click', applyEstimatesToDashboard);
 
-    // Build vs Buy
     ['bbBuildCapex', 'bbBuildOpex', 'bbBuildRealization', 'bbBuyCapex', 'bbBuyOpex', 'bbBuyRealization'].forEach(id => {
       document.getElementById(id)?.addEventListener('input', runBuildBuy);
     });
 
-    // Assumptions
     ['paramBenefitY2', 'paramBenefitY3', 'paramOpexY2', 'paramOpexY3'].forEach(id => {
       document.getElementById(id)?.addEventListener('input', calculate);
     });
 
-    // Header Actions
     document.getElementById('btnSave')?.addEventListener('click', saveToStorage);
     document.getElementById('btnClear')?.addEventListener('click', clearStorage);
     document.getElementById('btnExportJSON')?.addEventListener('click', exportJSON);
     document.getElementById('btnExportCSV')?.addEventListener('click', exportCSV);
     document.getElementById('btnPrint')?.addEventListener('click', () => window.print());
 
-    // Initial Execution
     ['capex', 'opex', 'benefit', 'realization', 'wacc'].forEach(id => updateFromSlider(id));
     runEstimators();
   });
