@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Hardened CSP with strict context restrictions -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';" />
   <title>Enterprise AI Invest Decision Engine</title>
   
   <meta property="og:title" content="Enterprise AI Invest Decision Engine" />
-  <meta property="og:description" content="A guided 5-step investment wizard grounded in corporate finance fundamentals with Web Crypto encryption." />
+  <meta property="og:description" content="A guided 5-step investment wizard grounded in corporate finance fundamentals with executive printable memo reports." />
   <meta property="og:type" content="website" />
 
   <style>
@@ -37,7 +36,7 @@
     .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .badge { background: #1e3a8a; color: #93c5fd; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; border: 1px solid #3b82f6; }
 
-    /* WIZARD PROGRESS STEPPER */
+    /* WIZARD STEPPER */
     .wizard-stepper { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 12px; overflow-x: auto; }
     .step-btn { background: var(--card-sub); border: 1px solid var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: 8px; font-size: 0.825rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
     .step-btn:hover { color: var(--text); background: #1e293b; }
@@ -63,7 +62,7 @@
     input[type="text"], input[type="password"], select, input[type="number"] {
       width: 100%; padding: 8px 12px; background: var(--card-sub); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 0.875rem; outline: none;
     }
-    input[type="number"]:focus, input[type="text"]:focus, input[type="password"]:focus, select:focus { border-color: var(--primary); }
+    input[type="number"]:focus, input[type="text"]:focus, select:focus { border-color: var(--primary); }
     input[type="range"] { width: 100%; accent-color: var(--primary); cursor: pointer; }
     
     /* TOOLTIPS */
@@ -109,7 +108,7 @@
     }
     .tooltip-wrap:hover .tooltip-text { visibility: visible; opacity: 1; }
 
-    /* REFACTORED CLASS-BASED VERDICT BOXES */
+    /* VERDICT BOXES */
     .verdict-box { border-radius: 8px; padding: 18px; margin-bottom: 20px; border-left: 6px solid; transition: all 0.2s ease; }
     .verdict-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
     .verdict-desc { font-size: 0.85rem; line-height: 1.45; }
@@ -158,14 +157,45 @@
     .is-hidden { display: none !important; }
 
     .footer { text-align: center; margin-top: 40px; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 16px; }
-    
+
+    /* DEDICATED REPORT PRINT CONTAINER */
+    #printReportContainer { display: none; }
+
+    /* PRINT / PDF STYLING */
     @media print {
-      body { background: #fff; color: #000; padding: 0; }
-      .wizard-stepper, .wizard-nav, .header-actions, .footer, input[type="range"], .btn-action, .tooltip-text, .scenario-pill-group { display: none !important; }
-      .card { background: #fff; border: 1px solid #ccc; color: #000; break-inside: avoid; }
-      .kpi-card { background: #f8fafc; border: 1px solid #ccc; color: #000; }
-      th { background: #f1f5f9; color: #000; }
-      .step-content { display: block !important; }
+      @page { size: letter portrait; margin: 15mm; }
+      body { background: #ffffff !important; color: #0f172a !important; padding: 0 !important; font-size: 9.5pt; line-height: 1.35; }
+      
+      /* Hide Interactive UI Elements */
+      .wizard-stepper, .wizard-nav, .header-actions, .footer, .step-content, .error-banner, header { display: none !important; }
+      
+      /* Display Dedicated Printable Report */
+      #printReportContainer { display: block !important; }
+
+      .rpt-header { border-bottom: 2pt solid #0f172a; padding-bottom: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; }
+      .rpt-title { font-size: 16pt; font-weight: 800; color: #0f172a; }
+      .rpt-meta { font-size: 8.5pt; color: #475569; text-align: right; }
+      
+      .rpt-section-title { font-size: 10.5pt; font-weight: 700; color: #0f172a; margin: 14px 0 6px 0; border-bottom: 1pt solid #cbd5e1; padding-bottom: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+      .rpt-verdict-box { border: 1.5pt solid #0f172a; border-left-width: 6pt; padding: 10px 12px; margin-bottom: 14px; background: #f8fafc; border-radius: 4px; break-inside: avoid; }
+      .rpt-verdict-approved { border-left-color: #059669; }
+      .rpt-verdict-hold { border-left-color: #d97706; }
+      .rpt-verdict-terminated { border-left-color: #dc2626; }
+      .rpt-verdict-title { font-size: 11pt; font-weight: 800; margin-bottom: 3px; }
+      .rpt-verdict-desc { font-size: 8.5pt; color: #334155; }
+
+      .rpt-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; break-inside: avoid; }
+      .rpt-kpi-card { border: 1pt solid #cbd5e1; background: #f8fafc; padding: 10px; text-align: center; border-radius: 4px; }
+      .rpt-kpi-label { font-size: 7.5pt; color: #64748b; font-weight: 700; text-transform: uppercase; }
+      .rpt-kpi-val { font-size: 13pt; font-weight: 800; color: #0f172a; margin-top: 2px; }
+
+      .rpt-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 8pt; break-inside: avoid; }
+      .rpt-table th, .rpt-table td { padding: 6px 8px; border: 0.5pt solid #cbd5e1; }
+      .rpt-table th { background: #f1f5f9 !important; color: #1e293b !important; font-weight: 700; text-align: right; }
+      .rpt-table th:first-child, .rpt-table td:first-child { text-align: left; }
+      
+      .rpt-footer { margin-top: 20px; border-top: 1pt solid #e2e8f0; padding-top: 8px; font-size: 7.5pt; color: #64748b; display: flex; justify-content: space-between; }
     }
   </style>
 </head>
@@ -188,7 +218,7 @@
       <button class="btn-action" id="btnExportJSON">📥 JSON</button>
       <button class="btn-action" id="btnExportCSV">📊 CSV</button>
       <button class="btn-action btn-crypto" id="btnEncryptExport">🔐 Encrypted Export</button>
-      <button class="btn-action" id="btnPrint">🖨️ Print / PDF</button>
+      <button class="btn-action btn-primary" id="btnPrint">🖨️ Print / PDF</button>
       <span class="badge">© 2026 Sateesh Bolloju</span>
     </div>
   </header>
@@ -551,7 +581,110 @@
 
     <div class="wizard-nav">
       <button class="btn-action" data-step-target="4">⬅️ Back to Decision Scorecard</button>
-      <button class="btn-action btn-primary" id="btnPrintSummary">🖨️ Print / Save Executive Summary PDF</button>
+      <button class="btn-action btn-primary" id="btnPrintSummary">🖨️ Print Executive Investment Report</button>
+    </div>
+  </div>
+
+  <!-- DEDICATED PRINT / PDF EXECUTIVE REPORT VIEW -->
+  <div id="printReportContainer">
+    <div class="rpt-header">
+      <div>
+        <div class="rpt-title">EXECUTIVE AI INVESTMENT MEMORANDUM</div>
+        <div style="font-size: 10pt; font-weight: 700; color: #1e3a8a;" id="rptProjectName">--</div>
+      </div>
+      <div class="rpt-meta">
+        <div><strong>Funding Stage:</strong> <span id="rptStage">--</span></div>
+        <div><strong>Date Evaluated:</strong> <span id="rptDate">--</span></div>
+        <div><strong>Governance Framework:</strong> Corporate Finance / Stage-Gated</div>
+      </div>
+    </div>
+
+    <div id="rptVerdictBox" class="rpt-verdict-box">
+      <div id="rptVerdictTitle" class="rpt-verdict-title">--</div>
+      <div id="rptVerdictDesc" class="rpt-verdict-desc">--</div>
+    </div>
+
+    <div class="rpt-kpi-grid">
+      <div class="rpt-kpi-card">
+        <div class="rpt-kpi-label">3-Year Net Present Value (NPV)</div>
+        <div class="rpt-kpi-val" id="rptNpv">--</div>
+      </div>
+      <div class="rpt-kpi-card">
+        <div class="rpt-kpi-label">Average Annual ROIC</div>
+        <div class="rpt-kpi-val" id="rptRoic">--</div>
+      </div>
+      <div class="rpt-kpi-card">
+        <div class="rpt-kpi-label">Cumulative Payback Horizon</div>
+        <div class="rpt-kpi-val" id="rptPayback">--</div>
+      </div>
+    </div>
+
+    <div class="rpt-section-title">1. Multi-Year Cash Flow Schedule & Financial Returns</div>
+    <table class="rpt-table" id="rptCashFlowTable">
+      <thead>
+        <tr>
+          <th>Period</th>
+          <th>Capital Outlay (CapEx)</th>
+          <th>Annual Run OpEx</th>
+          <th>Projected Gross Benefit</th>
+          <th>Realized Cash Flow</th>
+          <th>Net Cash Flow</th>
+          <th>Discounted PV (@ WACC)</th>
+        </tr>
+      </thead>
+      <tbody id="rptCashFlowBody"></tbody>
+    </table>
+
+    <div class="rpt-section-title">2. Strategic Architecture: Build In-House vs. Commercial SaaS</div>
+    <table class="rpt-table">
+      <thead>
+        <tr>
+          <th>Evaluation Dimension</th>
+          <th>Option A: Build In-House</th>
+          <th>Option B: Buy Commercial SaaS</th>
+          <th>Recommendation Advantage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>3-Year Total Cost of Ownership (TCO)</strong></td>
+          <td id="rptTcoBuild">--</td>
+          <td id="rptTcoBuy">--</td>
+          <td id="rptAdvTco" style="font-weight:700;">--</td>
+        </tr>
+        <tr>
+          <td><strong>3-Year Net Present Value (NPV)</strong></td>
+          <td id="rptNpvBuild">--</td>
+          <td id="rptNpvBuy">--</td>
+          <td id="rptAdvNpv" style="font-weight:700;">--</td>
+        </tr>
+        <tr>
+          <td><strong>Cumulative Payback Horizon</strong></td>
+          <td id="rptPayBuild">--</td>
+          <td id="rptPayBuy">--</td>
+          <td id="rptAdvPay" style="font-weight:700;">--</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="rpt-section-title">3. Hurdle Rate & Cash Realization Sensitivity Analysis</div>
+    <table class="rpt-table">
+      <thead>
+        <tr>
+          <th>WACC Rate \ Cash Realization</th>
+          <th>35% (Adoption Risk)</th>
+          <th>50% (Base Defensible)</th>
+          <th>65% (Healthy)</th>
+          <th>80% (High Conversion)</th>
+          <th>95% (Full Expansion)</th>
+        </tr>
+      </thead>
+      <tbody id="rptSensitivityBody"></tbody>
+    </table>
+
+    <div class="rpt-footer">
+      <div>Enterprise AI Capital Allocation Framework • Grounded in Hurdle Rates, ROIC & Stage Gates</div>
+      <div>Confidential • Generated for Investment Committee & Governance Review</div>
     </div>
   </div>
 
@@ -568,7 +701,8 @@
     npv: 0,
     roic: 0,
     paybackYears: 0,
-    paybackFormatted: '--'
+    paybackFormatted: '--',
+    cashFlows: []
   };
 
   let autoSaveTimer = null;
@@ -660,7 +794,10 @@
       const netCash3 = (benefit * p.benefitY3 * realization) - (opex * p.opexY3);
       const cashFlows = [netCash1, netCash2, netCash3];
 
-      const npv = -capex + (netCash1 / Math.pow(1 + wacc, 1)) + (netCash2 / Math.pow(1 + wacc, 2)) + (netCash3 / Math.pow(1 + wacc, 3));
+      const pv1 = netCash1 / Math.pow(1 + wacc, 1);
+      const pv2 = netCash2 / Math.pow(1 + wacc, 2);
+      const pv3 = netCash3 / Math.pow(1 + wacc, 3);
+      const npv = -capex + pv1 + pv2 + pv3;
       const avgNetCash = (netCash1 + netCash2 + netCash3) / 3;
       const roic = capex > 0 ? (avgNetCash / capex) * 100 : 0;
       const paybackRes = calcPrecisePayback(capex, cashFlows);
@@ -669,6 +806,12 @@
       modelState.roic = roic;
       modelState.paybackYears = paybackRes.years;
       modelState.paybackFormatted = paybackRes.formatted;
+      modelState.cashFlows = [
+        { period: 'Year 0 (T0)', capex: -capex, opex: 0, gross: 0, real: 0, net: -capex, pv: -capex },
+        { period: 'Year 1 (T1)', capex: 0, opex: opex * 1.00, gross: benefit * 1.00, real: benefit * 1.00 * realization, net: netCash1, pv: pv1 },
+        { period: 'Year 2 (T2)', capex: 0, opex: opex * p.opexY2, gross: benefit * p.benefitY2, real: benefit * p.benefitY2 * realization, net: netCash2, pv: pv2 },
+        { period: 'Year 3 (T3)', capex: 0, opex: opex * p.opexY3, gross: benefit * p.benefitY3, real: benefit * p.benefitY3 * realization, net: netCash3, pv: pv3 }
+      ];
 
       const npvEl = document.getElementById('npvVal');
       if (npvEl) {
@@ -710,6 +853,7 @@
 
       renderSensitivity(capex, opex, benefit, p);
       runBuildBuy();
+      populatePrintReport();
     } catch (err) {
       showError('Calculation error: ' + err.message);
     }
@@ -751,6 +895,80 @@
 
       tbody.appendChild(tr);
     });
+  }
+
+  function populatePrintReport() {
+    try {
+      const pName = document.getElementById('projectName')?.value || 'AI Initiative';
+      const stage = document.getElementById('stage')?.value || 'Pilot';
+      
+      document.getElementById('rptProjectName').textContent = pName;
+      document.getElementById('rptStage').textContent = stage;
+      document.getElementById('rptDate').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      // Copy KPIs
+      document.getElementById('rptNpv').textContent = formatMoney(modelState.npv);
+      document.getElementById('rptRoic').textContent = modelState.roic.toFixed(1) + "%";
+      document.getElementById('rptPayback').textContent = modelState.paybackFormatted;
+
+      // Copy Verdict
+      const vBox = document.getElementById('rptVerdictBox');
+      const vTitle = document.getElementById('rptVerdictTitle');
+      const vDesc = document.getElementById('rptVerdictDesc');
+      const srcTitle = document.getElementById('verdictTitle')?.textContent;
+      const srcDesc = document.getElementById('verdictDesc')?.textContent;
+
+      vTitle.textContent = srcTitle;
+      vDesc.textContent = srcDesc;
+      vBox.className = 'rpt-verdict-box';
+      if (srcTitle.includes('APPROVED')) vBox.classList.add('rpt-verdict-approved');
+      else if (srcTitle.includes('HOLD')) vBox.classList.add('rpt-verdict-hold');
+      else vBox.classList.add('rpt-verdict-terminated');
+
+      // Populate Cash Flow Schedule
+      const cfBody = document.getElementById('rptCashFlowBody');
+      while (cfBody.firstChild) cfBody.removeChild(cfBody.firstChild);
+
+      modelState.cashFlows.forEach(cf => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${cf.period}</strong></td>
+          <td>${cf.capex !== 0 ? formatMoney(cf.capex) : '—'}</td>
+          <td>${cf.opex !== 0 ? formatMoney(cf.opex) : '—'}</td>
+          <td>${cf.gross !== 0 ? formatMoney(cf.gross) : '—'}</td>
+          <td>${cf.real !== 0 ? formatMoney(cf.real) : '—'}</td>
+          <td style="font-weight:700;">${formatMoney(cf.net)}</td>
+          <td style="font-weight:700;">${formatMoney(cf.pv)}</td>
+        `;
+        cfBody.appendChild(tr);
+      });
+
+      // Populate Build vs Buy
+      document.getElementById('rptTcoBuild').textContent = document.getElementById('bbTcoBuild')?.textContent;
+      document.getElementById('rptTcoBuy').textContent = document.getElementById('bbTcoBuy')?.textContent;
+      document.getElementById('rptAdvTco').textContent = document.getElementById('bbAdvTco')?.textContent;
+
+      document.getElementById('rptNpvBuild').textContent = document.getElementById('bbNpvBuild')?.textContent;
+      document.getElementById('rptNpvBuy').textContent = document.getElementById('bbNpvBuy')?.textContent;
+      document.getElementById('rptAdvNpv').textContent = document.getElementById('bbAdvNpv')?.textContent;
+
+      document.getElementById('rptPayBuild').textContent = document.getElementById('bbPayBuild')?.textContent;
+      document.getElementById('rptPayBuy').textContent = document.getElementById('bbPayBuy')?.textContent;
+      document.getElementById('rptAdvPay').textContent = document.getElementById('bbAdvPay')?.textContent;
+
+      // Populate Sensitivity in Print
+      const rptSensBody = document.getElementById('rptSensitivityBody');
+      while (rptSensBody.firstChild) rptSensBody.removeChild(rptSensBody.firstChild);
+
+      const srcSensRows = document.querySelectorAll('#sensitivityBody tr');
+      srcSensRows.forEach(row => {
+        const clone = row.cloneNode(true);
+        rptSensBody.appendChild(clone);
+      });
+
+    } catch (e) {
+      console.warn('Print report generation error:', e);
+    }
   }
 
   function runEstimators() {
@@ -1027,7 +1245,6 @@
     }
   }
 
-  // --- ENTERPRISE WEB CRYPTO ENCRYPTED EXPORT (AES-GCM 256-BIT) ---
   async function exportEncryptedFile() {
     const password = prompt("Enter a strong encryption passphrase to protect this financial assessment (HIPAA / SOC 2 compliance):");
     if (!password) return;
@@ -1036,7 +1253,6 @@
       const enc = new TextEncoder();
       const plaintext = enc.encode(JSON.stringify(getPayload(), null, 2));
 
-      // Generate random 16-byte salt and 12-byte IV
       const salt = crypto.getRandomValues(new Uint8Array(16));
       const iv = crypto.getRandomValues(new Uint8Array(12));
 
@@ -1067,7 +1283,6 @@
         plaintext
       );
 
-      // Package: Salt (16 bytes) + IV (12 bytes) + Ciphertext
       const combined = new Uint8Array(salt.byteLength + iv.byteLength + encryptedContent.byteLength);
       combined.set(salt, 0);
       combined.set(iv, salt.byteLength);
@@ -1088,7 +1303,6 @@
     }
   }
 
-  // WIZARD STEPPER NAVIGATION
   function selectStep(stepBtn) {
     if (!stepBtn) return;
     const targetPanelId = stepBtn.getAttribute('aria-controls');
@@ -1116,10 +1330,14 @@
     if (btn) selectStep(btn);
   }
 
+  function triggerPrintReport() {
+    populatePrintReport();
+    window.print();
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
 
-    // Wizard Tab Button Click & Keyboard Bindings
     const stepButtons = Array.from(document.querySelectorAll('.step-btn'));
 
     stepButtons.forEach((btn, index) => {
@@ -1146,7 +1364,6 @@
       });
     });
 
-    // Delegated Wizard Navigation Buttons (zero inline onclick)
     document.querySelectorAll('[data-step-target]').forEach(el => {
       el.addEventListener('click', () => {
         const target = el.getAttribute('data-step-target');
@@ -1154,7 +1371,6 @@
       });
     });
 
-    // Scenario Selection Buttons
     document.querySelectorAll('[data-scenario]').forEach(btn => {
       btn.addEventListener('click', () => {
         const scen = btn.getAttribute('data-scenario');
@@ -1162,7 +1378,6 @@
       });
     });
 
-    // Dynamic Input Bindings
     document.getElementById('projectName')?.addEventListener('input', () => { calculate(); debouncedAutoSave(); });
     document.getElementById('stage')?.addEventListener('change', () => { calculate(); debouncedAutoSave(); });
 
@@ -1184,14 +1399,15 @@
       });
     });
 
-    // Header Actions
     document.getElementById('btnSave')?.addEventListener('click', saveToStorage);
     document.getElementById('btnClear')?.addEventListener('click', clearStorage);
     document.getElementById('btnExportJSON')?.addEventListener('click', exportJSON);
     document.getElementById('btnExportCSV')?.addEventListener('click', exportCSV);
     document.getElementById('btnEncryptExport')?.addEventListener('click', exportEncryptedFile);
-    document.getElementById('btnPrint')?.addEventListener('click', () => window.print());
-    document.getElementById('btnPrintSummary')?.addEventListener('click', () => window.print());
+    
+    // Print triggers
+    document.getElementById('btnPrint')?.addEventListener('click', triggerPrintReport);
+    document.getElementById('btnPrintSummary')?.addEventListener('click', triggerPrintReport);
 
     runEstimators();
   });
