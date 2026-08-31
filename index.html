@@ -7,7 +7,7 @@
   <title>Enterprise AI Invest Decision Engine</title>
   
   <meta property="og:title" content="Enterprise AI Invest Decision Engine" />
-  <meta property="og:description" content="Evaluate enterprise AI initiatives with corporate finance fundamentals: NPV, ROIC, Stage-Gated Governance, and Build vs. Buy analysis." />
+  <meta property="og:description" content="Evaluate enterprise AI initiatives with corporate finance fundamentals: NPV, ROIC, Stage-Gated Governance, Scenario Comparison, and Build vs. Buy analysis." />
   <meta property="og:type" content="website" />
 
   <style>
@@ -109,13 +109,13 @@
     .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
     .kpi-card { background: var(--card-sub); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
     .kpi-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .kpi-val { font-size: 1.25rem; font-weight: 700; margin-top: 6px; }
+    .kpi-val { font-size: 1.15rem; font-weight: 700; margin-top: 6px; }
 
     table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: right; }
     th, td { padding: 8px 10px; border: 1px solid var(--border); }
     th { background: var(--card-sub); color: var(--text-muted); font-weight: 600; text-align: right; }
     th:first-child, td:first-child { text-align: left; }
-    .highlight-cell { outline: 2px solid var(--primary); font-weight: 700; }
+    .highlight-cell { outline: 2px solid var(--primary); background: rgba(59, 130, 246, 0.2) !important; font-weight: 700; }
 
     .pos { color: var(--success); }
     .neg { color: var(--danger); }
@@ -129,13 +129,16 @@
     .calc-row { display: flex; justify-content: space-between; font-size: 0.825rem; padding: 4px 0; border-bottom: 1px dashed #1e293b; }
     .calc-row:last-child { border-bottom: none; font-weight: 700; color: #60a5fa; }
 
-    .error-banner { display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: #fca5a5; padding: 10px 14px; border-radius: 6px; font-size: 0.825rem; margin-bottom: 16px; }
+    .scenario-pill-group { display: flex; gap: 8px; margin-bottom: 16px; }
+    .scenario-pill { padding: 6px 12px; font-size: 0.775rem; border-radius: 6px; border: 1px solid var(--border); background: var(--card-sub); color: var(--text-muted); cursor: pointer; }
+    .scenario-pill.active { border-color: var(--primary); color: #fff; background: #1e3a8a; font-weight: 600; }
 
+    .error-banner { display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: #fca5a5; padding: 10px 14px; border-radius: 6px; font-size: 0.825rem; margin-bottom: 16px; }
     .footer { text-align: center; margin-top: 40px; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 16px; }
     
     @media print {
       body { background: #fff; color: #000; padding: 0; }
-      .tabs, .header-actions, .footer, input[type="range"], .btn-action, .tooltip-text { display: none !important; }
+      .tabs, .header-actions, .footer, input[type="range"], .btn-action, .tooltip-text, .scenario-pill-group { display: none !important; }
       .card { background: #fff; border: 1px solid #ccc; color: #000; break-inside: avoid; }
       .kpi-card { background: #f8fafc; border: 1px solid #ccc; color: #000; }
       th { background: #f1f5f9; color: #000; }
@@ -151,7 +154,7 @@
   <header>
     <div>
       <h1>Enterprise AI Invest Decision Engine</h1>
-      <p class="subtitle">Grounded in corporate finance fundamentals: Hurdle rates, cash realization, and staged-gated governance.</p>
+      <p class="subtitle">Grounded in corporate finance fundamentals: Hurdle rates, cash realization, scenario comparison, and staged gating.</p>
     </div>
     <div class="header-actions">
       <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.75rem; color:var(--text-muted); cursor:pointer; margin-right:4px;">
@@ -159,7 +162,8 @@
       </label>
       <button class="btn-action" id="btnSave">💾 Save</button>
       <button class="btn-action" id="btnClear">🗑️ Clear</button>
-      <button class="btn-action" id="btnExport">📥 Export JSON</button>
+      <button class="btn-action" id="btnExportJSON">📥 JSON</button>
+      <button class="btn-action" id="btnExportCSV">📊 CSV</button>
       <button class="btn-action" id="btnPrint">🖨️ Print / PDF</button>
       <span class="badge">© 2026 Sateesh Bolloju</span>
     </div>
@@ -170,23 +174,31 @@
     <button class="tab-btn active" role="tab" id="tabBtnDashboard" aria-selected="true" aria-controls="tab-dashboard">📊 1. Decision Dashboard</button>
     <button class="tab-btn" role="tab" id="tabBtnEstimators" aria-selected="false" aria-controls="tab-estimators">🧮 2. Non-Finance Cost & Value Estimator</button>
     <button class="tab-btn" role="tab" id="tabBtnBuildbuy" aria-selected="false" aria-controls="tab-buildbuy">⚖️ 3. Build vs. Buy Analysis</button>
-    <button class="tab-btn" role="tab" id="tabBtnAssumptions" aria-selected="false" aria-controls="tab-assumptions">⚙️ 4. Model Assumptions</button>
+    <button class="tab-btn" role="tab" id="tabBtnAssumptions" aria-selected="false" aria-controls="tab-assumptions">⚙️ 4. Model Assumptions & Scenarios</button>
   </div>
 
   <!-- TAB 1: EXECUTIVE DECISION DASHBOARD -->
   <div id="tab-dashboard" class="tab-content active" role="tabpanel">
+    
+    <div class="scenario-pill-group">
+      <span style="font-size:0.8rem; color:var(--text-muted); align-self:center; margin-right:4px;">Quick Scenario:</span>
+      <button class="scenario-pill active" id="scenBase" onclick="loadScenario('base')">Base Case</button>
+      <button class="scenario-pill" id="scenCons" onclick="loadScenario('conservative')">Conservative / Downside</button>
+      <button class="scenario-pill" id="scenAggr" onclick="loadScenario('aggressive')">Aggressive / Scale</button>
+    </div>
+
     <div class="grid">
       <div>
         <div class="card">
           <div class="card-title">Project Scope & Governance Stage</div>
           <div class="form-group">
             <label for="projectName">Project Name</label>
-            <input type="text" id="projectName" value="Clinical Workflow Automation Copilot" maxlength="100" />
+            <input type="text" id="projectName" value="Customer Operations & Contract Copilot" maxlength="100" />
           </div>
           <div class="form-group">
             <label for="stage">
               <span class="tooltip-wrap">Stage-Gate Funding Stage
-                <span class="tooltip-text">A disciplined governance gate releasing funding in tranches (Discovery ➔ Pilot ➔ Production ➔ Scale) based on validated milestones.</span>
+                <span class="tooltip-text">Governance gate releasing capital in tranches (Discovery ➔ Pilot ➔ Production ➔ Scale) against operational milestones.</span>
               </span>
             </label>
             <select id="stage">
@@ -199,20 +211,20 @@
           <div class="form-group">
             <label for="capex">
               <span class="tooltip-wrap">Upfront CapEx ($)
-                <span class="tooltip-text"><strong>CapEx:</strong> Upfront capital invested in model fine-tuning, data pipeline integration, architecture setup, and engineering.</span>
+                <span class="tooltip-text"><strong>CapEx:</strong> Upfront build, custom pipeline engineering, security audit, and data integration capital outlay.</span>
               </span>
-              <span class="val-display" id="capexDisplay">$250,000</span>
+              <span class="val-display" id="capexDisplay">$260,000</span>
             </label>
-            <input type="range" id="capex" min="25000" max="1000000" step="25000" value="250000" aria-valuemin="25000" aria-valuemax="1000000" aria-valuenow="250000" />
+            <input type="range" id="capex" min="25000" max="1000000" step="25000" value="260000" aria-valuemin="25000" aria-valuemax="1000000" aria-valuenow="260000" />
           </div>
           <div class="form-group">
             <label for="opex">
               <span class="tooltip-wrap">Annual Run OpEx ($)
-                <span class="tooltip-text"><strong>OpEx:</strong> Recurring annual cash costs including GPU/token API compute, model drift retraining, data curation, and compliance.</span>
+                <span class="tooltip-text"><strong>OpEx:</strong> Recurring annual cash costs including GPU/token compute, drift retraining, data curation, and ongoing infosec.</span>
               </span>
-              <span class="val-display" id="opexDisplay">$80,000</span>
+              <span class="val-display" id="opexDisplay">$50,000</span>
             </label>
-            <input type="range" id="opex" min="10000" max="400000" step="5000" value="80000" aria-valuemin="10000" aria-valuemax="400000" aria-valuenow="80000" />
+            <input type="range" id="opex" min="10000" max="400000" step="5000" value="50000" aria-valuemin="10000" aria-valuemax="400000" aria-valuenow="50000" />
           </div>
         </div>
 
@@ -223,23 +235,23 @@
               <span class="tooltip-wrap">Projected Annual Gross Value ($)
                 <span class="tooltip-text"><strong>Gross Benefit:</strong> Total estimated theoretical business value before discounting for uncaptured saved time.</span>
               </span>
-              <span class="val-display" id="benefitDisplay">$280,000</span>
+              <span class="val-display" id="benefitDisplay">$234,000</span>
             </label>
-            <input type="range" id="benefit" min="50000" max="1000000" step="25000" value="280000" aria-valuemin="50000" aria-valuemax="1000000" aria-valuenow="280000" />
+            <input type="range" id="benefit" min="50000" max="1000000" step="10000" value="234000" aria-valuemin="50000" aria-valuemax="1000000" aria-valuenow="234000" />
           </div>
           <div class="form-group">
             <label for="realization">
               <span class="tooltip-wrap">Hard Cash Realization Rate (%)
-                <span class="tooltip-text"><strong>Realization Rate:</strong> The fraction of theoretical saved time converted into real P&L cash (vendor reductions or billable capacity) rather than 'productivity theater'.</span>
+                <span class="tooltip-text"><strong>Realization Rate:</strong> The percentage of saved hours that convert into real P&L savings or billable capacity vs. productivity theater.</span>
               </span>
-              <span class="val-display" id="realizationDisplay">65%</span>
+              <span class="val-display" id="realizationDisplay">70%</span>
             </label>
-            <input type="range" id="realization" min="20" max="100" step="5" value="65" aria-valuemin="20" aria-valuemax="100" aria-valuenow="65" />
+            <input type="range" id="realization" min="20" max="100" step="5" value="70" aria-valuemin="20" aria-valuemax="100" aria-valuenow="70" />
           </div>
           <div class="form-group">
             <label for="wacc">
               <span class="tooltip-wrap">Hurdle Rate / WACC (%)
-                <span class="tooltip-text"><strong>Hurdle Rate (Weighted Average Cost of Capital):</strong> Minimum required return to justify enterprise capital commitment.</span>
+                <span class="tooltip-text"><strong>Hurdle Rate (WACC):</strong> Minimum rate of return required to justify enterprise capital commitment.</span>
               </span>
               <span class="val-display" id="waccDisplay">10%</span>
             </label>
@@ -259,7 +271,7 @@
           <div class="kpi-card">
             <div class="kpi-label">
               <span class="tooltip-wrap">3-Yr Net Present Value
-                <span class="tooltip-text">Present value of future net cash flows discounted at Hurdle Rate minus upfront CapEx. Must be > $0.</span>
+                <span class="tooltip-text">Present value of future net cash flows discounted at Hurdle Rate minus CapEx. Must be > $0.</span>
               </span>
             </div>
             <div class="kpi-val" id="npvVal">--</div>
@@ -267,7 +279,7 @@
           <div class="kpi-card">
             <div class="kpi-label">
               <span class="tooltip-wrap">Avg Return on Capital (ROIC)
-                <span class="tooltip-text">Average annual net cash flow over the 3-year horizon divided by upfront CapEx. Must exceed Hurdle Rate.</span>
+                <span class="tooltip-text">Average annual net cash flow over the horizon divided by upfront CapEx. Must clear Hurdle Rate.</span>
               </span>
             </div>
             <div class="kpi-val" id="roicVal">--</div>
@@ -275,7 +287,7 @@
           <div class="kpi-card">
             <div class="kpi-label">
               <span class="tooltip-wrap">Cumulative Payback
-                <span class="tooltip-text">Fractional years required for cumulative net cash inflows to fully recover initial CapEx outlay.</span>
+                <span class="tooltip-text">Time in months/years required for cumulative cash inflows to recover upfront CapEx.</span>
               </span>
             </div>
             <div class="kpi-val" id="paybackVal">--</div>
@@ -315,18 +327,18 @@
           <div class="card-title">Step A: Calculate Upfront CapEx (Build Costs)</div>
           <div class="form-group">
             <label for="estDevMonths">Internal Dev / Engineering Team (Months × $15k/mo FTE)</label>
-            <input type="number" id="estDevMonths" value="10" min="0" max="60" />
+            <input type="number" id="estDevMonths" value="12" min="0" max="60" />
           </div>
           <div class="form-group">
             <label for="estConsulting">External AI Specialists / Vendor Setup ($)</label>
-            <input type="number" id="estConsulting" value="60000" min="0" step="5000" />
+            <input type="number" id="estConsulting" value="50000" min="0" step="5000" />
           </div>
           <div class="form-group">
             <label for="estDataPipelines">Data Cleaning, Security Review & Pipeline Setup ($)</label>
-            <input type="number" id="estDataPipelines" value="40000" min="0" step="5000" />
+            <input type="number" id="estDataPipelines" value="30000" min="0" step="5000" />
           </div>
           <div class="calc-box">
-            <div class="calc-row"><span>Estimated Total Initial CapEx:</span><span id="calcCapExTotal">$250,000</span></div>
+            <div class="calc-row"><span>Estimated Total Initial CapEx:</span><span id="calcCapExTotal">$260,000</span></div>
           </div>
         </div>
 
@@ -334,18 +346,18 @@
           <div class="card-title">Step B: Calculate Annual OpEx (Run Costs)</div>
           <div class="form-group">
             <label for="estUsers">Expected Active Users / Seats</label>
-            <input type="number" id="estUsers" value="100" min="1" max="100000" />
+            <input type="number" id="estUsers" value="60" min="1" max="100000" />
           </div>
           <div class="form-group">
             <label for="estCostPerUser">Avg Monthly API / GPU Compute & Token Cost per User ($)</label>
-            <input type="number" id="estCostPerUser" value="40" min="0" max="1000" />
+            <input type="number" id="estCostPerUser" value="35" min="0" max="1000" />
           </div>
           <div class="form-group">
             <label for="estAdminOpex">Annual Retraining, Security Monitoring & Admin OpEx ($)</label>
-            <input type="number" id="estAdminOpex" value="32000" min="0" step="2000" />
+            <input type="number" id="estAdminOpex" value="24800" min="0" step="1000" />
           </div>
           <div class="calc-box">
-            <div class="calc-row"><span>Estimated Annual Run OpEx:</span><span id="calcOpExTotal">$80,000</span></div>
+            <div class="calc-row"><span>Estimated Annual Run OpEx:</span><span id="calcOpExTotal">$50,000</span></div>
           </div>
         </div>
       </div>
@@ -355,33 +367,33 @@
           <div class="card-title">Step C: Calculate Value Capture & Realization Rate</div>
           <div class="form-group">
             <label for="estEmpCount">Target Employees Impacted</label>
-            <input type="number" id="estEmpCount" value="40" min="1" max="10000" />
+            <input type="number" id="estEmpCount" value="25" min="1" max="10000" />
           </div>
           <div class="form-group">
             <label for="estHoursSaved">Estimated Hours Saved per Employee per Week</label>
-            <input type="number" id="estHoursSaved" value="3.5" min="0" max="40" step="0.5" />
+            <input type="number" id="estHoursSaved" value="4.0" min="0" max="40" step="0.5" />
           </div>
           <div class="form-group">
             <label for="estHourlyWage">Average Fully Loaded Hourly Rate ($/hr)</label>
-            <input type="number" id="estHourlyWage" value="40" min="1" max="500" />
+            <input type="number" id="estHourlyWage" value="45" min="1" max="500" />
           </div>
           <div class="form-group">
             <label for="estCaptureType">Value Capture Type (Determines Hard Cash Realization %)</label>
             <select id="estCaptureType">
               <option value="90">Direct Contractor / Agency Spend Elimination (90% Realization)</option>
-              <option value="65" selected>Productivity Converted to Billable Work / Backlog Relief (65% Realization)</option>
+              <option value="70" selected>Productivity Converted to Billable Work / Backlog Relief (70% Realization)</option>
               <option value="35">General Time Savings / Soft Efficiency (35% Realization - Productivity Theater Risk)</option>
             </select>
           </div>
           <div class="calc-box">
-            <div class="calc-row"><span>Gross Theoretical Value:</span><span id="calcGrossValue">$291,200</span></div>
-            <div class="calc-row"><span>Realized P&L Cash Flow:</span><span id="calcRealizedValue">$189,280</span></div>
+            <div class="calc-row"><span>Gross Theoretical Value:</span><span id="calcGrossValue">$234,000</span></div>
+            <div class="calc-row"><span>Realized P&L Cash Flow:</span><span id="calcRealizedValue">$163,800</span></div>
           </div>
         </div>
 
         <div class="card" style="text-align: center;">
           <button class="btn-action btn-primary" id="btnApplyEstimates" style="padding: 10px 20px; font-size: 0.9rem;">
-            ⚡ Apply Estimates to Dashboard
+            ⚡ Apply Estimates to Dashboard & Build vs. Buy
           </button>
         </div>
       </div>
@@ -396,24 +408,34 @@
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">High initial capital investment, proprietary IP ownership, and lower recurring marginal software cost.</p>
         <div class="form-group">
           <label for="bbBuildCapex">Build Upfront CapEx ($)</label>
-          <input type="number" id="bbBuildCapex" value="250000" min="0" />
+          <input type="number" id="bbBuildCapex" value="260000" min="0" />
         </div>
         <div class="form-group">
           <label for="bbBuildOpex">Build Annual OpEx ($)</label>
-          <input type="number" id="bbBuildOpex" value="80000" min="0" />
+          <input type="number" id="bbBuildOpex" value="50000" min="0" />
+        </div>
+        <div class="form-group">
+          <label for="bbBuildRealization">Build Value Realization (% of Gross Benefit)</label>
+          <input type="number" id="bbBuildRealization" value="100" min="10" max="150" />
+          <p style="font-size:0.725rem; color:var(--text-muted); margin-top:2px;">100% = Full customization and proprietary data alignment</p>
         </div>
       </div>
 
       <div class="card">
         <div class="card-title">Option B: Buy Commercial / COTS SaaS AI</div>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Low upfront onboarding fee, rapid deployment, high recurring seat subscription cost, and vendor lock-in risk.</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Low upfront setup fee, fast deployment, recurring high subscription/seat cost, and vendor lock-in risk.</p>
         <div class="form-group">
           <label for="bbBuyCapex">Buy Upfront Setup CapEx ($)</label>
-          <input type="number" id="bbBuyCapex" value="50000" min="0" />
+          <input type="number" id="bbBuyCapex" value="40000" min="0" />
         </div>
         <div class="form-group">
           <label for="bbBuyOpex">Buy Annual Subscription OpEx ($)</label>
-          <input type="number" id="bbBuyOpex" value="160000" min="0" />
+          <input type="number" id="bbBuyOpex" value="110000" min="0" />
+        </div>
+        <div class="form-group">
+          <label for="bbBuyRealization">Buy Value Realization (% of Gross Benefit)</label>
+          <input type="number" id="bbBuyRealization" value="90" min="10" max="150" />
+          <p style="font-size:0.725rem; color:var(--text-muted); margin-top:2px;">90% = Off-the-shelf generalized tool fit (slight feature compromise)</p>
         </div>
       </div>
     </div>
@@ -432,36 +454,36 @@
         <tbody>
           <tr>
             <td><strong>3-Year Total Cost of Ownership (TCO)</strong></td>
-            <td id="bbTcoBuild">$502,000</td>
-            <td id="bbTcoBuy">$554,000</td>
-            <td id="bbAdvTco" class="pos">Build In-House</td>
+            <td id="bbTcoBuild">$417,500</td>
+            <td id="bbTcoBuy">$386,500</td>
+            <td id="bbAdvTco" class="pos">Buy Commercial</td>
           </tr>
           <tr>
-            <td><strong>3-Year Net Present Value (NPV)</strong></td>
-            <td id="bbNpvBuild">+$57,926</td>
-            <td id="bbNpvBuy">+$49,662</td>
-            <td id="bbAdvNpv" class="pos">Build In-House</td>
+            <td><strong>3-Year Net Present Value (NPV @ WACC)</strong></td>
+            <td id="bbNpvBuild">+$74,406</td>
+            <td id="bbNpvBuy">+$82,342</td>
+            <td id="bbAdvNpv" class="pos">Buy Commercial</td>
           </tr>
           <tr>
             <td><strong>Cumulative Payback Horizon</strong></td>
-            <td id="bbPayBuild">2.2 yrs</td>
-            <td id="bbPayBuy">2.3 yrs</td>
-            <td id="bbAdvPay" class="pos">Build In-House</td>
+            <td id="bbPayBuild">2 yrs 1 mo (2.1 yrs)</td>
+            <td id="bbPayBuy">1 yr 2 mos (1.2 yrs)</td>
+            <td id="bbAdvPay" class="pos">Buy Commercial</td>
           </tr>
         </tbody>
       </table>
       <div id="bbVerdictBox" class="calc-box" style="margin-top: 16px; border-left: 4px solid var(--primary);">
-        <strong id="bbVerdictTitle" style="color: #60a5fa;">STRATEGIC VERDICT: BUILD IN-HOUSE RECOMMENDED</strong>
-        <p id="bbVerdictDesc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Internal custom build yields superior 3-year NPV and avoids recurring seat-license inflation.</p>
+        <strong id="bbVerdictTitle" style="color: #60a5fa;">STRATEGIC VERDICT: BUY COMMERCIAL SAAS RECOMMENDED</strong>
+        <p id="bbVerdictDesc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Commercial COTS deployment provides lower initial capital risk and faster payback for current team scale.</p>
       </div>
     </div>
   </div>
 
-  <!-- TAB 4: MODEL ASSUMPTIONS & PARAMETERS -->
+  <!-- TAB 4: MODEL ASSUMPTIONS & SCENARIOS -->
   <div id="tab-assumptions" class="tab-content" role="tabpanel">
     <div class="card">
       <div class="card-title">Auditable Model Growth & Inflation Constants</div>
-      <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 16px;">These parameters define the multi-year trajectory across adoption scaling and infrastructure indexing.</p>
+      <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 16px;">Configure dynamic scaling curves across adoption expansion and operational infrastructure indexing.</p>
       
       <div class="grid">
         <div class="form-group">
@@ -472,12 +494,12 @@
         <div class="form-group">
           <label for="paramBenefitY3">Year 3 Value Realization Scale Factor</label>
           <input type="number" id="paramBenefitY3" value="1.30" step="0.05" min="1.0" max="3.0" />
-          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Baseline: 1.30 (+30% cumulative scale at maturity)</p>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Baseline: 1.30 (+30% scale at full maturity)</p>
         </div>
         <div class="form-group">
           <label for="paramOpexY2">Year 2 OpEx Escalation / Indexing</label>
           <input type="number" id="paramOpexY2" value="1.05" step="0.01" min="1.0" max="1.5" />
-          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Baseline: 1.05 (+5% data volume/API inflation)</p>
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Baseline: 1.05 (+5% token volume/API inflation)</p>
         </div>
         <div class="form-group">
           <label for="paramOpexY3">Year 3 OpEx Escalation / Indexing</label>
@@ -496,7 +518,6 @@
 <script>
   'use strict';
 
-  // --- SAFE DOM & SANITIZATION UTILITIES ---
   function safeNumber(val, fallback = 0, min = 0, max = Infinity) {
     const num = Number(val);
     if (!Number.isFinite(num)) return fallback;
@@ -527,7 +548,6 @@
     if (el) el.style.display = 'none';
   }
 
-  // --- TAB SWITCHING ---
   function switchTab(evt, tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => {
@@ -544,7 +564,6 @@
     }
   }
 
-  // --- CORE FINANCIAL CALCULATIONS ---
   function getModelAssumptions() {
     return {
       benefitY2: safeNumber(document.getElementById('paramBenefitY2')?.value, 1.15, 1.0, 3.0),
@@ -554,8 +573,9 @@
     };
   }
 
-  function calcCumulativePayback(capex, cashFlows) {
-    if (capex <= 0) return "0.0 yrs";
+  // Monthly Granular Payback Calculation
+  function calcPrecisePayback(capex, cashFlows) {
+    if (capex <= 0) return "0 mos (0.0 yrs)";
     let cum = 0;
     for (let i = 0; i < cashFlows.length; i++) {
       const cf = cashFlows[i];
@@ -564,19 +584,25 @@
       cum += cf;
       if (cum >= capex) {
         const fraction = cf > 0 ? (capex - prevCum) / cf : 0;
-        return (i + fraction).toFixed(1) + " yrs";
+        const totalYears = i + fraction;
+        const totalMonths = Math.round(totalYears * 12);
+        const y = Math.floor(totalMonths / 12);
+        const m = totalMonths % 12;
+        if (y === 0) return `${m} mos (${totalYears.toFixed(1)} yrs)`;
+        if (m === 0) return `${y} yr${y > 1 ? 's' : ''} (${totalYears.toFixed(1)} yrs)`;
+        return `${y} yr${y > 1 ? 's' : ''} ${m} mo${m > 1 ? 's' : ''} (${totalYears.toFixed(1)} yrs)`;
       }
     }
-    return `> ${cashFlows.length}.0 yrs`;
+    return `> ${cashFlows.length} yrs`;
   }
 
   function calculate() {
     try {
       clearError();
-      const capex = safeNumber(document.getElementById('capex')?.value, 250000, 1);
-      const opex = safeNumber(document.getElementById('opex')?.value, 80000, 0);
-      const benefit = safeNumber(document.getElementById('benefit')?.value, 280000, 0);
-      const realization = safeNumber(document.getElementById('realization')?.value, 65, 0, 100) / 100;
+      const capex = safeNumber(document.getElementById('capex')?.value, 260000, 1);
+      const opex = safeNumber(document.getElementById('opex')?.value, 50000, 0);
+      const benefit = safeNumber(document.getElementById('benefit')?.value, 234000, 0);
+      const realization = safeNumber(document.getElementById('realization')?.value, 70, 0, 100) / 100;
       const wacc = safeNumber(document.getElementById('wacc')?.value, 10, 1, 100) / 100;
 
       const p = getModelAssumptions();
@@ -590,9 +616,9 @@
       const npv = -capex + (netCash1 / Math.pow(1 + wacc, 1)) + (netCash2 / Math.pow(1 + wacc, 2)) + (netCash3 / Math.pow(1 + wacc, 3));
       const avgNetCash = (netCash1 + netCash2 + netCash3) / 3;
       const roic = capex > 0 ? (avgNetCash / capex) * 100 : 0;
-      const payback = calcCumulativePayback(capex, cashFlows);
+      const payback = calcPrecisePayback(capex, cashFlows);
 
-      // DOM Updates (Safe textContent)
+      // DOM Updates
       const npvEl = document.getElementById('npvVal');
       if (npvEl) {
         npvEl.textContent = formatMoney(npv);
@@ -608,7 +634,7 @@
       const paybackEl = document.getElementById('paybackVal');
       if (paybackEl) paybackEl.textContent = payback;
 
-      // Verdict Logic
+      // Dynamic Verdict Logic with Buy / Build Awareness
       const verdictBox = document.getElementById('verdictBox');
       const verdictTitle = document.getElementById('verdictTitle');
       const verdictDesc = document.getElementById('verdictDesc');
@@ -619,7 +645,7 @@
           verdictBox.style.borderColor = 'var(--success)';
           verdictTitle.style.color = 'var(--success)';
           verdictTitle.textContent = 'APPROVED TO ADVANCE';
-          verdictDesc.textContent = 'Project clears enterprise hurdle rates with tangible hard P&L conversion. Release current stage funding tranche.';
+          verdictDesc.textContent = 'Initiative clears enterprise hurdle rates with strong hard P&L conversion. Release current stage funding tranche.';
         } else if (npv > 0 && realization < 0.5) {
           verdictBox.style.background = 'rgba(245, 158, 11, 0.15)';
           verdictBox.style.borderColor = 'var(--warning)';
@@ -630,7 +656,7 @@
           verdictBox.style.background = 'rgba(239, 68, 68, 0.15)';
           verdictBox.style.borderColor = 'var(--danger)';
           verdictTitle.style.color = 'var(--danger)';
-          verdictTitle.textContent = 'TERMINATE / AVOID SUNK COST';
+          verdictTitle.textContent = 'TERMINATE / SUNK COST AVOIDANCE';
           verdictDesc.textContent = 'Negative risk-adjusted NPV. Ongoing run costs exceed defensible cash returns. Do not commit capital tranches.';
         }
       }
@@ -642,18 +668,17 @@
     }
   }
 
-  // --- SAFE DOM RENDERING FOR SENSITIVITY TABLE ---
+  // Strict Sensitivity Cell Highlighting
   function renderSensitivity(capex, opex, benefit, p) {
     const tbody = document.getElementById('sensitivityBody');
     if (!tbody) return;
 
-    // Clear existing nodes safely
     while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
 
     const waccRates = [0.06, 0.08, 0.10, 0.12, 0.14];
     const realRates = [0.35, 0.50, 0.65, 0.80, 0.95];
     const currentWacc = safeNumber(document.getElementById('wacc')?.value, 10) / 100;
-    const currentReal = safeNumber(document.getElementById('realization')?.value, 65) / 100;
+    const currentReal = safeNumber(document.getElementById('realization')?.value, 70) / 100;
 
     waccRates.forEach(w => {
       const tr = document.createElement('tr');
@@ -673,7 +698,8 @@
         const td = document.createElement('td');
         td.textContent = formatMoney(cellNpv);
 
-        const isHighlight = Math.abs(w - currentWacc) < 0.005 && Math.abs(r - currentReal) < 0.07;
+        // Strict nearest distance selection
+        const isHighlight = Math.abs(w - currentWacc) < 0.015 && Math.abs(r - currentReal) < 0.075;
         td.className = (cellNpv >= 0 ? 'pos' : 'neg') + (isHighlight ? ' highlight-cell' : '');
         tr.appendChild(td);
       });
@@ -682,7 +708,7 @@
     });
   }
 
-  // --- NON-FINANCE ESTIMATOR MODULE ---
+  // Non-Finance Estimator Module
   function runEstimators() {
     try {
       const devMonths = safeNumber(document.getElementById('estDevMonths')?.value, 0);
@@ -704,7 +730,7 @@
       const empCount = safeNumber(document.getElementById('estEmpCount')?.value, 0);
       const hoursSaved = safeNumber(document.getElementById('estHoursSaved')?.value, 0);
       const wage = safeNumber(document.getElementById('estHourlyWage')?.value, 0);
-      const realRate = safeNumber(document.getElementById('estCaptureType')?.value, 65) / 100;
+      const realRate = safeNumber(document.getElementById('estCaptureType')?.value, 70) / 100;
 
       const grossVal = empCount * (hoursSaved * 52) * wage;
       const realizedVal = grossVal * realRate;
@@ -718,6 +744,7 @@
     }
   }
 
+  // Estimator Syncs to Dashboard and Build vs Buy
   function applyEstimatesToDashboard() {
     const devMonths = safeNumber(document.getElementById('estDevMonths')?.value, 0);
     const consulting = safeNumber(document.getElementById('estConsulting')?.value, 0);
@@ -733,7 +760,7 @@
     const hoursSaved = safeNumber(document.getElementById('estHoursSaved')?.value, 0);
     const wage = safeNumber(document.getElementById('estHourlyWage')?.value, 0);
     const grossVal = empCount * (hoursSaved * 52) * wage;
-    const realRate = safeNumber(document.getElementById('estCaptureType')?.value, 65);
+    const realRate = safeNumber(document.getElementById('estCaptureType')?.value, 70);
 
     const capexIn = document.getElementById('capex');
     const opexIn = document.getElementById('opex');
@@ -744,6 +771,12 @@
     if (opexIn) opexIn.value = Math.min(400000, Math.max(10000, totalOpex));
     if (benIn) benIn.value = Math.min(1000000, Math.max(50000, grossVal));
     if (realIn) realIn.value = realRate;
+
+    // Direct Sync to Build vs. Buy Tab
+    const bbBuildCap = document.getElementById('bbBuildCapex');
+    const bbBuildOp = document.getElementById('bbBuildOpex');
+    if (bbBuildCap) bbBuildCap.value = totalCapex;
+    if (bbBuildOp) bbBuildOp.value = totalOpex;
 
     updateFromSlider('capex');
     updateFromSlider('opex');
@@ -758,34 +791,38 @@
     }
   }
 
-  // --- BUILD VS BUY MODULE ---
+  // Build vs Buy with Independent Benefit Streams
   function runBuildBuy() {
     try {
-      const bCapex = safeNumber(document.getElementById('bbBuildCapex')?.value, 250000);
-      const bOpex = safeNumber(document.getElementById('bbBuildOpex')?.value, 80000);
-      const buyCapex = safeNumber(document.getElementById('bbBuyCapex')?.value, 50000);
-      const buyOpex = safeNumber(document.getElementById('bbBuyOpex')?.value, 160000);
+      const bCapex = safeNumber(document.getElementById('bbBuildCapex')?.value, 260000);
+      const bOpex = safeNumber(document.getElementById('bbBuildOpex')?.value, 50000);
+      const bRealMult = safeNumber(document.getElementById('bbBuildRealization')?.value, 100) / 100;
 
-      const benefit = safeNumber(document.getElementById('benefit')?.value, 280000);
-      const realization = safeNumber(document.getElementById('realization')?.value, 65) / 100;
+      const buyCapex = safeNumber(document.getElementById('bbBuyCapex')?.value, 40000);
+      const buyOpex = safeNumber(document.getElementById('bbBuyOpex')?.value, 110000);
+      const buyRealMult = safeNumber(document.getElementById('bbBuyRealization')?.value, 90) / 100;
+
+      const baseBenefit = safeNumber(document.getElementById('benefit')?.value, 234000);
+      const realization = safeNumber(document.getElementById('realization')?.value, 70) / 100;
       const wacc = safeNumber(document.getElementById('wacc')?.value, 10) / 100;
       const p = getModelAssumptions();
 
       const tcoBuild = bCapex + (bOpex * 1.0) + (bOpex * p.opexY2) + (bOpex * p.opexY3);
       const tcoBuy = buyCapex + (buyOpex * 1.0) + (buyOpex * p.opexY2) + (buyOpex * p.opexY3);
 
-      const bNet1 = (benefit * 1.00 * realization) - (bOpex * 1.00);
-      const bNet2 = (benefit * p.benefitY2 * realization) - (bOpex * p.opexY2);
-      const bNet3 = (benefit * p.benefitY3 * realization) - (bOpex * p.opexY3);
+      // Independent benefit cash flows
+      const bNet1 = (baseBenefit * 1.00 * realization * bRealMult) - (bOpex * 1.00);
+      const bNet2 = (baseBenefit * p.benefitY2 * realization * bRealMult) - (bOpex * p.opexY2);
+      const bNet3 = (baseBenefit * p.benefitY3 * realization * bRealMult) - (bOpex * p.opexY3);
       const npvBuild = -bCapex + (bNet1 / Math.pow(1 + wacc, 1)) + (bNet2 / Math.pow(1 + wacc, 2)) + (bNet3 / Math.pow(1 + wacc, 3));
 
-      const buyNet1 = (benefit * 1.00 * realization) - (buyOpex * 1.00);
-      const buyNet2 = (benefit * p.benefitY2 * realization) - (buyOpex * p.opexY2);
-      const buyNet3 = (benefit * p.benefitY3 * realization) - (buyOpex * p.opexY3);
+      const buyNet1 = (baseBenefit * 1.00 * realization * buyRealMult) - (buyOpex * 1.00);
+      const buyNet2 = (baseBenefit * p.benefitY2 * realization * buyRealMult) - (buyOpex * p.opexY2);
+      const buyNet3 = (baseBenefit * p.benefitY3 * realization * buyRealMult) - (buyOpex * p.opexY3);
       const npvBuy = -buyCapex + (buyNet1 / Math.pow(1 + wacc, 1)) + (buyNet2 / Math.pow(1 + wacc, 2)) + (buyNet3 / Math.pow(1 + wacc, 3));
 
-      const payBuild = calcCumulativePayback(bCapex, [bNet1, bNet2, bNet3]);
-      const payBuy = calcCumulativePayback(buyCapex, [buyNet1, buyNet2, buyNet3]);
+      const payBuild = calcPrecisePayback(bCapex, [bNet1, bNet2, bNet3]);
+      const payBuy = calcPrecisePayback(buyCapex, [buyNet1, buyNet2, buyNet3]);
 
       const tcoBuildEl = document.getElementById('bbTcoBuild');
       const tcoBuyEl = document.getElementById('bbTcoBuy');
@@ -813,8 +850,8 @@
       if (payBuildEl) payBuildEl.textContent = payBuild;
       if (payBuyEl) payBuyEl.textContent = payBuy;
       if (advPayEl) {
-        const pBuildNum = parseFloat(payBuild) || 99;
-        const pBuyNum = parseFloat(payBuy) || 99;
+        const pBuildNum = parseFloat(payBuild.replace(/[^0-9.]/g, '')) || 99;
+        const pBuyNum = parseFloat(payBuy.replace(/[^0-9.]/g, '')) || 99;
         advPayEl.textContent = pBuildNum <= pBuyNum ? "Build In-House" : "Buy Commercial";
       }
 
@@ -823,10 +860,10 @@
       if (vTitle && vDesc) {
         if (npvBuild >= npvBuy) {
           vTitle.textContent = "STRATEGIC VERDICT: BUILD IN-HOUSE RECOMMENDED";
-          vDesc.textContent = "Internal custom build yields superior 3-year NPV and avoids recurring seat-license inflation.";
+          vDesc.textContent = "Internal custom build yields superior 3-year NPV and avoids recurring seat-license inflation. Best for core proprietary data advantage.";
         } else {
           vTitle.textContent = "STRATEGIC VERDICT: BUY COMMERCIAL SAAS RECOMMENDED";
-          vDesc.textContent = "Commercial vendor/COTS model provides lower upfront capital exposure and faster payback timeline.";
+          vDesc.textContent = "Commercial vendor/COTS model provides lower upfront capital exposure, lower TCO, and faster payback timeline.";
         }
       }
     } catch (err) {
@@ -834,7 +871,35 @@
     }
   }
 
-  // --- SLIDER & INPUT EVENT BINDING ---
+  // Scenario Management
+  function loadScenario(type) {
+    document.querySelectorAll('.scenario-pill').forEach(p => p.classList.remove('active'));
+    
+    if (type === 'base') {
+      document.getElementById('scenBase')?.classList.add('active');
+      document.getElementById('capex').value = 260000;
+      document.getElementById('opex').value = 50000;
+      document.getElementById('benefit').value = 234000;
+      document.getElementById('realization').value = 70;
+      document.getElementById('wacc').value = 10;
+    } else if (type === 'conservative') {
+      document.getElementById('scenCons')?.classList.add('active');
+      document.getElementById('capex').value = 300000;
+      document.getElementById('opex').value = 65000;
+      document.getElementById('benefit').value = 180000;
+      document.getElementById('realization').value = 45;
+      document.getElementById('wacc').value = 12;
+    } else if (type === 'aggressive') {
+      document.getElementById('scenAggr')?.classList.add('active');
+      document.getElementById('capex').value = 220000;
+      document.getElementById('opex').value = 45000;
+      document.getElementById('benefit').value = 320000;
+      document.getElementById('realization').value = 85;
+      document.getElementById('wacc').value = 8;
+    }
+    ['capex', 'opex', 'benefit', 'realization', 'wacc'].forEach(id => updateFromSlider(id));
+  }
+
   function updateFromSlider(id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -853,16 +918,15 @@
     autoSave();
   }
 
-  // --- STORAGE & EXPORT ---
   function getPayload() {
     return {
       timestamp: Date.now(),
       projectName: document.getElementById('projectName')?.value || 'AI Initiative',
       stage: document.getElementById('stage')?.value || 'Pilot',
-      capexRaw: safeNumber(document.getElementById('capex')?.value, 250000),
-      opexRaw: safeNumber(document.getElementById('opex')?.value, 80000),
-      benefitRaw: safeNumber(document.getElementById('benefit')?.value, 280000),
-      realizationRaw: safeNumber(document.getElementById('realization')?.value, 65),
+      capexRaw: safeNumber(document.getElementById('capex')?.value, 260000),
+      opexRaw: safeNumber(document.getElementById('opex')?.value, 50000),
+      benefitRaw: safeNumber(document.getElementById('benefit')?.value, 234000),
+      realizationRaw: safeNumber(document.getElementById('realization')?.value, 70),
       waccRaw: safeNumber(document.getElementById('wacc')?.value, 10),
       npvRaw: parseFloat(document.getElementById('npvVal')?.textContent.replace(/[^0-9.-]/g, '')) || 0,
       roicRaw: parseFloat(document.getElementById('roicVal')?.textContent.replace(/[^0-9.-]/g, '')) || 0,
@@ -903,7 +967,6 @@
       const raw = localStorage.getItem('ai_invest_engine_data');
       if (!raw) return;
       const d = JSON.parse(raw);
-      // Auto-expire after 30 days
       if (d.timestamp && (Date.now() - d.timestamp > 30 * 86400000)) {
         localStorage.removeItem('ai_invest_engine_data');
         return;
@@ -938,17 +1001,45 @@
     }
   }
 
-  // --- ATTACH EVENT LISTENERS (CLEAN SEPARATION) ---
+  function exportCSV() {
+    try {
+      const p = getPayload();
+      const csvRows = [
+        ['Metric / Field', 'Value'],
+        ['Project Name', `"${p.projectName}"`],
+        ['Stage-Gate Phase', `"${p.stage}"`],
+        ['Upfront CapEx ($)', p.capexRaw],
+        ['Annual Run OpEx ($)', p.opexRaw],
+        ['Projected Annual Gross Value ($)', p.benefitRaw],
+        ['Hard Cash Realization Rate (%)', p.realizationRaw],
+        ['Enterprise Hurdle Rate / WACC (%)', p.waccRaw],
+        ['3-Year Net Present Value (NPV $)', p.npvRaw],
+        ['Average ROIC (%)', p.roicRaw],
+        ['Cumulative Payback Horizon', `"${p.paybackFormatted}"`]
+      ];
+      const csvContent = 'data:text/csv;charset=utf-8,' + csvRows.map(e => e.join(',')).join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const a = document.createElement('a');
+      a.href = encodedUri;
+      a.download = `${sanitizeFilename(p.projectName)}_financial_scorecard.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (err) {
+      showError('CSV Export error: ' + err.message);
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
 
-    // Tab buttons
+    // Tabs
     document.getElementById('tabBtnDashboard')?.addEventListener('click', (e) => switchTab(e, 'tab-dashboard'));
     document.getElementById('tabBtnEstimators')?.addEventListener('click', (e) => switchTab(e, 'tab-estimators'));
     document.getElementById('tabBtnBuildbuy')?.addEventListener('click', (e) => switchTab(e, 'tab-buildbuy'));
     document.getElementById('tabBtnAssumptions')?.addEventListener('click', (e) => switchTab(e, 'tab-assumptions'));
 
-    // Dashboard sliders & inputs
+    // Dashboard Inputs
     ['capex', 'opex', 'benefit', 'realization', 'wacc'].forEach(id => {
       document.getElementById(id)?.addEventListener('input', () => updateFromSlider(id));
     });
@@ -963,7 +1054,7 @@
     document.getElementById('btnApplyEstimates')?.addEventListener('click', applyEstimatesToDashboard);
 
     // Build vs Buy
-    ['bbBuildCapex', 'bbBuildOpex', 'bbBuyCapex', 'bbBuyOpex'].forEach(id => {
+    ['bbBuildCapex', 'bbBuildOpex', 'bbBuildRealization', 'bbBuyCapex', 'bbBuyOpex', 'bbBuyRealization'].forEach(id => {
       document.getElementById(id)?.addEventListener('input', runBuildBuy);
     });
 
@@ -972,13 +1063,14 @@
       document.getElementById(id)?.addEventListener('input', calculate);
     });
 
-    // Header actions
+    // Actions
     document.getElementById('btnSave')?.addEventListener('click', saveToStorage);
     document.getElementById('btnClear')?.addEventListener('click', clearStorage);
-    document.getElementById('btnExport')?.addEventListener('click', exportJSON);
+    document.getElementById('btnExportJSON')?.addEventListener('click', exportJSON);
+    document.getElementById('btnExportCSV')?.addEventListener('click', exportCSV);
     document.getElementById('btnPrint')?.addEventListener('click', () => window.print());
 
-    // Initial render
+    // Initialize
     ['capex', 'opex', 'benefit', 'realization', 'wacc'].forEach(id => updateFromSlider(id));
     runEstimators();
   });
