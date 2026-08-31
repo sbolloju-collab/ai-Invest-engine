@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1120" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';" />
   <title>Enterprise AI Invest Decision Engine</title>
   
   <meta property="og:title" content="Enterprise AI Invest Decision Engine" />
-  <meta property="og:description" content="A guided 5-step investment wizard grounded in corporate finance fundamentals with executive printable memo reports." />
+  <meta property="og:description" content="A guided 5-step investment wizard grounded in corporate finance fundamentals & mobile-first touch architecture." />
   <meta property="og:type" content="website" />
 
   <style>
@@ -27,28 +28,33 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; }
-    .container { max-width: 1200px; margin: 0 auto; }
+    html { overflow-x: hidden; }
+    body { background: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; -webkit-tap-highlight-color: transparent; overflow-x: hidden; width: 100%; }
+    .container { max-width: 1200px; margin: 0 auto; width: 100%; }
     
     header { margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
-    h1 { font-size: 1.55rem; font-weight: 700; color: #f8fafc; }
-    .subtitle { color: var(--text-muted); font-size: 0.85rem; margin-top: 4px; }
+    h1 { font-size: clamp(1.25rem, 4vw, 1.55rem); font-weight: 700; color: #f8fafc; }
+    .subtitle { color: var(--text-muted); font-size: clamp(0.775rem, 2.5vw, 0.85rem); margin-top: 4px; }
+    
+    /* HEADER ACTIONS & RESPONSIVE OVERFLOW MENU */
     .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .badge { background: #1e3a8a; color: #93c5fd; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; border: 1px solid #3b82f6; }
+    .header-overflow-panel { display: contents; }
+    .badge { background: #1e3a8a; color: #93c5fd; padding: 6px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; border: 1px solid #3b82f6; white-space: nowrap; }
 
-    /* WIZARD STEPPER */
-    .wizard-stepper { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 12px; overflow-x: auto; }
-    .step-btn { background: var(--card-sub); border: 1px solid var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: 8px; font-size: 0.825rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+    /* WIZARD STEPPER (TOUCH-ACCESSIBLE) */
+    .wizard-stepper { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+    .wizard-stepper::-webkit-scrollbar { height: 4px; }
+    .wizard-stepper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .step-btn { background: var(--card-sub); border: 1px solid var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: 8px; font-size: 0.825rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; flex-shrink: 0; min-height: 44px; touch-action: manipulation; }
     .step-btn:hover { color: var(--text); background: #1e293b; }
     .step-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-    .step-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
-    .step-num { background: rgba(0,0,0,0.3); border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; }
+    .step-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 0 10px rgba(59, 130, 246, 0.35); }
+    .step-num { background: rgba(0,0,0,0.3); border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; }
 
     .step-content { display: none; }
     .step-content.active { display: block; }
 
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 
     .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
     .card-title { font-size: 0.975rem; font-weight: 600; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; color: #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
@@ -56,16 +62,17 @@
     .help-box { background: rgba(59, 130, 246, 0.08); border-left: 4px solid var(--primary); padding: 12px 16px; border-radius: 6px; font-size: 0.825rem; color: #cbd5e1; margin-bottom: 18px; }
 
     .form-group { margin-bottom: 14px; }
-    label { display: flex; justify-content: space-between; font-size: 0.825rem; font-weight: 500; margin-bottom: 6px; color: var(--text-muted); align-items: center; }
+    label { display: flex; justify-content: space-between; font-size: 0.825rem; font-weight: 500; margin-bottom: 6px; color: var(--text-muted); align-items: center; flex-wrap: wrap; gap: 4px; }
     .val-display { color: var(--text); font-weight: 600; }
     
+    /* PREVENT IOS AUTO-ZOOM (FONT-SIZE >= 16PX) */
     input[type="text"], input[type="password"], select, input[type="number"] {
-      width: 100%; padding: 8px 12px; background: var(--card-sub); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 0.875rem; outline: none;
+      width: 100%; padding: 10px 12px; background: var(--card-sub); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 16px; outline: none; min-height: 44px;
     }
-    input[type="number"]:focus, input[type="text"]:focus, select:focus { border-color: var(--primary); }
-    input[type="range"] { width: 100%; accent-color: var(--primary); cursor: pointer; }
+    input[type="number"]:focus, input[type="text"]:focus, input[type="password"]:focus, select:focus { border-color: var(--primary); outline: 2px solid var(--primary); outline-offset: 1px; }
+    input[type="range"] { width: 100%; accent-color: var(--primary); cursor: pointer; height: 36px; }
     
-    /* TOOLTIPS */
+    /* TOUCH & FOCUS ACCESSIBLE TOOLTIPS */
     .tooltip-wrap {
       position: relative;
       display: inline-flex;
@@ -73,11 +80,15 @@
       cursor: help;
       border-bottom: 1px dotted #60a5fa;
       color: #e2e8f0;
+      padding: 2px 4px;
+      border-radius: 4px;
     }
+    .tooltip-wrap:focus-visible { outline: 2px solid var(--primary); }
     .tooltip-wrap .tooltip-text {
       visibility: hidden;
       opacity: 0;
-      width: 270px;
+      width: 260px;
+      max-width: calc(100vw - 36px);
       background-color: #020617;
       color: #f1f5f9;
       text-align: left;
@@ -106,7 +117,13 @@
       border-style: solid;
       border-color: #020617 transparent transparent transparent;
     }
-    .tooltip-wrap:hover .tooltip-text { visibility: visible; opacity: 1; }
+    .tooltip-wrap:hover .tooltip-text,
+    .tooltip-wrap:focus-within .tooltip-text,
+    .tooltip-wrap:focus .tooltip-text,
+    .tooltip-wrap:active .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
 
     /* VERDICT BOXES */
     .verdict-box { border-radius: 8px; padding: 18px; margin-bottom: 20px; border-left: 6px solid; transition: all 0.2s ease; }
@@ -127,8 +144,12 @@
     .kpi-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
     .kpi-val { font-size: 1.25rem; font-weight: 700; margin-top: 6px; }
 
-    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: right; }
-    th, td { padding: 9px 12px; border: 1px solid var(--border); }
+    /* RESPONSIVE TABLE WRAPPER WITH SWIPE INDICATOR AFFORDANCE */
+    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 12px; scrollbar-width: thin; }
+    .table-responsive::-webkit-scrollbar { height: 4px; }
+    .table-responsive::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: right; min-width: 480px; }
+    th, td { padding: 10px 12px; border: 1px solid var(--border); }
     th { background: var(--card-sub); color: var(--text-muted); font-weight: 600; text-align: right; }
     th:first-child, td:first-child { text-align: left; }
     .highlight-cell { outline: 2px solid var(--primary); background: rgba(59, 130, 246, 0.2) !important; font-weight: 700; }
@@ -136,21 +157,23 @@
     .pos { color: var(--success); }
     .neg { color: var(--danger); }
 
-    .btn-action { background: #334155; color: #fff; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    /* 44PX MINIMUM TOUCH TARGETS */
+    .btn-action { background: #334155; color: #fff; padding: 10px 16px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.825rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; touch-action: manipulation; }
     .btn-action:hover { background: #475569; }
+    .btn-action:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
     .btn-primary { background: var(--primary); border-color: var(--primary); }
     .btn-primary:hover { background: var(--primary-hover); }
     .btn-crypto { background: #5b21b6; border-color: #7c3aed; }
     .btn-crypto:hover { background: #6d28d9; }
 
-    .wizard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .wizard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); gap: 12px; }
 
     .calc-box { background: var(--card-sub); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-top: 12px; }
     .calc-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 5px 0; border-bottom: 1px dashed #1e293b; }
     .calc-row:last-child { border-bottom: none; font-weight: 700; color: #60a5fa; font-size: 0.9rem; }
 
     .scenario-pill-group { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
-    .scenario-pill { padding: 6px 12px; font-size: 0.775rem; border-radius: 6px; border: 1px solid var(--border); background: var(--card-sub); color: var(--text-muted); cursor: pointer; }
+    .scenario-pill { padding: 8px 14px; font-size: 0.775rem; border-radius: 6px; border: 1px solid var(--border); background: var(--card-sub); color: var(--text-muted); cursor: pointer; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
     .scenario-pill.active { border-color: var(--primary); color: #fff; background: #1e3a8a; font-weight: 600; }
 
     .error-banner { display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: #fca5a5; padding: 10px 14px; border-radius: 6px; font-size: 0.825rem; margin-bottom: 16px; }
@@ -158,18 +181,55 @@
 
     .footer { text-align: center; margin-top: 40px; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 16px; }
 
-    /* DEDICATED REPORT PRINT CONTAINER */
+    /* MOBILE DRAWER TOGGLE BUTTON */
+    .btn-mobile-menu { display: none; }
+
+    /* RESPONSIVE LAYOUT BREAKPOINTS */
+    @media (max-width: 768px) {
+      body { padding: 12px; }
+      .grid { grid-template-columns: 1fr; gap: 16px; }
+      .card { padding: 16px; margin-bottom: 16px; }
+      
+      .btn-mobile-menu { display: inline-flex; min-height: 44px; }
+      .header-actions { width: 100%; justify-content: space-between; margin-top: 8px; }
+      
+      .header-overflow-panel.is-collapsed {
+        display: none;
+      }
+      .header-overflow-panel {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 8px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dashed var(--border);
+      }
+      .header-overflow-panel .btn-action { flex: 1 1 calc(50% - 4px); }
+
+      .kpi-grid { grid-template-columns: 1fr; gap: 10px; }
+      .kpi-card { padding: 12px; }
+      .kpi-val { font-size: 1.2rem; }
+      .wizard-nav { flex-direction: column-reverse; width: 100%; }
+      .wizard-nav .btn-action { width: 100%; }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 10px; }
+      .header-overflow-panel .btn-action { flex: 1 1 100%; }
+      .step-btn { padding: 8px 12px; font-size: 0.775rem; }
+      .verdict-title { font-size: 1rem; }
+      .verdict-desc { font-size: 0.8rem; }
+    }
+
+    /* DEDICATED PRINT VIEW */
     #printReportContainer { display: none; }
 
-    /* PRINT / PDF STYLING */
     @media print {
       @page { size: letter portrait; margin: 15mm; }
       body { background: #ffffff !important; color: #0f172a !important; padding: 0 !important; font-size: 9.5pt; line-height: 1.35; }
       
-      /* Hide Interactive UI Elements */
       .wizard-stepper, .wizard-nav, .header-actions, .footer, .step-content, .error-banner, header { display: none !important; }
-      
-      /* Display Dedicated Printable Report */
       #printReportContainer { display: block !important; }
 
       .rpt-header { border-bottom: 2pt solid #0f172a; padding-bottom: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; }
@@ -190,7 +250,7 @@
       .rpt-kpi-label { font-size: 7.5pt; color: #64748b; font-weight: 700; text-transform: uppercase; }
       .rpt-kpi-val { font-size: 13pt; font-weight: 800; color: #0f172a; margin-top: 2px; }
 
-      .rpt-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 8pt; break-inside: avoid; }
+      .rpt-table { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 8pt; break-inside: avoid; min-width: 100%; }
       .rpt-table th, .rpt-table td { padding: 6px 8px; border: 0.5pt solid #cbd5e1; }
       .rpt-table th { background: #f1f5f9 !important; color: #1e293b !important; font-weight: 700; text-align: right; }
       .rpt-table th:first-child, .rpt-table td:first-child { text-align: left; }
@@ -207,19 +267,23 @@
   <header>
     <div>
       <h1>Enterprise AI Invest Decision Engine</h1>
-      <p class="subtitle">A guided 5-step investment wizard grounded in corporate finance fundamentals & Web Crypto security.</p>
+      <p class="subtitle">A guided 5-step investment wizard grounded in corporate finance fundamentals & mobile touch architecture.</p>
     </div>
     <div class="header-actions">
-      <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.75rem; color:var(--text-muted); cursor:pointer; margin-right:4px;">
+      <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.75rem; color:var(--text-muted); cursor:pointer;">
         <input type="checkbox" id="autoSaveToggle" checked /> Auto-Save
       </label>
-      <button class="btn-action" id="btnSave">💾 Save</button>
-      <button class="btn-action" id="btnClear">🗑️ Clear</button>
-      <button class="btn-action" id="btnExportJSON">📥 JSON</button>
-      <button class="btn-action" id="btnExportCSV">📊 CSV</button>
-      <button class="btn-action btn-crypto" id="btnEncryptExport">🔐 Encrypted Export</button>
-      <button class="btn-action btn-primary" id="btnPrint">🖨️ Print / PDF</button>
       <span class="badge">© 2026 Sateesh Bolloju</span>
+      <button class="btn-action btn-mobile-menu" id="btnToggleMenu" aria-expanded="false" aria-controls="headerMenu">⚙️ Actions Menu</button>
+      
+      <div class="header-overflow-panel is-collapsed" id="headerMenu">
+        <button class="btn-action" id="btnSave">💾 Save</button>
+        <button class="btn-action" id="btnClear">🗑️ Clear</button>
+        <button class="btn-action" id="btnExportJSON">📥 JSON</button>
+        <button class="btn-action" id="btnExportCSV">📊 CSV</button>
+        <button class="btn-action btn-crypto" id="btnEncryptExport">🔐 Encrypted</button>
+        <button class="btn-action btn-primary" id="btnPrint">🖨️ Print / PDF</button>
+      </div>
     </div>
   </header>
 
@@ -258,7 +322,8 @@
         </div>
         <div class="form-group">
           <label for="stage">
-            <span class="tooltip-wrap">Stage-Gate Funding Stage
+            <span class="tooltip-wrap" tabindex="0" role="button" aria-label="Stage-Gate Funding Stage Information">
+              Stage-Gate Funding Stage
               <span class="tooltip-text">Governance gate releasing capital in tranches (Discovery ➔ Pilot ➔ Production ➔ Scale) against operational milestones.</span>
             </span>
           </label>
@@ -397,36 +462,38 @@
 
     <div class="card">
       <div class="card-title">Build vs. Buy 3-Year Capital Comparison</div>
-      <table>
-        <thead>
-          <tr>
-            <th>Financial & Governance Metric</th>
-            <th>Option A: Build In-House</th>
-            <th>Option B: Buy Commercial SaaS</th>
-            <th>Advantage</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>3-Year Total Cost of Ownership (TCO)</strong></td>
-            <td id="bbTcoBuild">$417,500</td>
-            <td id="bbTcoBuy">$386,500</td>
-            <td id="bbAdvTco" class="pos">Buy Commercial</td>
-          </tr>
-          <tr>
-            <td><strong>3-Year Net Present Value (NPV @ WACC)</strong></td>
-            <td id="bbNpvBuild">+$74,406</td>
-            <td id="bbNpvBuy">+$82,342</td>
-            <td id="bbAdvNpv" class="pos">Buy Commercial</td>
-          </tr>
-          <tr>
-            <td><strong>Cumulative Payback Horizon</strong></td>
-            <td id="bbPayBuild">2 yrs 1 mo (2.1 yrs)</td>
-            <td id="bbPayBuy">1 yr 2 mos (1.2 yrs)</td>
-            <td id="bbAdvPay" class="pos">Buy Commercial</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Financial & Governance Metric</th>
+              <th>Option A: Build In-House</th>
+              <th>Option B: Buy Commercial SaaS</th>
+              <th>Advantage</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>3-Year Total Cost of Ownership (TCO)</strong></td>
+              <td id="bbTcoBuild">$417,500</td>
+              <td id="bbTcoBuy">$386,500</td>
+              <td id="bbAdvTco" class="pos">Buy Commercial</td>
+            </tr>
+            <tr>
+              <td><strong>3-Year Net Present Value (NPV @ WACC)</strong></td>
+              <td id="bbNpvBuild">+$74,406</td>
+              <td id="bbNpvBuy">+$82,342</td>
+              <td id="bbAdvNpv" class="pos">Buy Commercial</td>
+            </tr>
+            <tr>
+              <td><strong>Cumulative Payback Horizon</strong></td>
+              <td id="bbPayBuild">2 yrs 1 mo (2.1 yrs)</td>
+              <td id="bbPayBuy">1 yr 2 mos (1.2 yrs)</td>
+              <td id="bbAdvPay" class="pos">Buy Commercial</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div id="bbVerdictBox" class="calc-box" style="margin-top: 16px; border-left: 4px solid var(--primary);">
         <strong id="bbVerdictTitle" style="color: #60a5fa;">STRATEGIC VERDICT: BUY COMMERCIAL SAAS RECOMMENDED</strong>
         <p id="bbVerdictDesc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Commercial COTS deployment provides lower initial capital risk and faster payback for current team scale.</p>
@@ -450,7 +517,8 @@
       <div class="card-title">Enterprise Cost of Capital (Hurdle Rate)</div>
       <div class="form-group">
         <label for="wacc">
-          <span class="tooltip-wrap">Hurdle Rate / WACC (%)
+          <span class="tooltip-wrap" tabindex="0" role="button" aria-label="Hurdle Rate and WACC explanation">
+            Hurdle Rate / WACC (%)
             <span class="tooltip-text"><strong>Hurdle Rate (WACC):</strong> Minimum rate of return required to justify enterprise capital commitment.</span>
           </span>
           <span class="val-display" id="waccDisplay">10%</span>
@@ -513,7 +581,8 @@
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-label">
-          <span class="tooltip-wrap">3-Yr Net Present Value
+          <span class="tooltip-wrap" tabindex="0" role="button" aria-label="3-Year Net Present Value explanation">
+            3-Yr Net Present Value
             <span class="tooltip-text">Present value of future net cash flows discounted at Hurdle Rate minus CapEx. Must be > $0.</span>
           </span>
         </div>
@@ -521,7 +590,8 @@
       </div>
       <div class="kpi-card">
         <div class="kpi-label">
-          <span class="tooltip-wrap">Avg Return on Capital (ROIC)
+          <span class="tooltip-wrap" tabindex="0" role="button" aria-label="Average Return on Capital explanation">
+            Avg Return on Capital (ROIC)
             <span class="tooltip-text">Average annual net cash flow over the horizon divided by upfront CapEx. Must clear Hurdle Rate.</span>
           </span>
         </div>
@@ -529,7 +599,8 @@
       </div>
       <div class="kpi-card">
         <div class="kpi-label">
-          <span class="tooltip-wrap">Cumulative Payback
+          <span class="tooltip-wrap" tabindex="0" role="button" aria-label="Cumulative Payback explanation">
+            Cumulative Payback
             <span class="tooltip-text">Time in months/years required for cumulative cash inflows to recover upfront CapEx.</span>
           </span>
         </div>
@@ -564,19 +635,21 @@
 
     <div class="card">
       <div class="card-title">2-Way Sensitivity Matrix (NPV vs. Hurdle & Realization)</div>
-      <table id="sensitivityTable">
-        <thead>
-          <tr>
-            <th>WACC \ Realization</th>
-            <th>35%</th>
-            <th>50%</th>
-            <th>65%</th>
-            <th>80%</th>
-            <th>95%</th>
-          </tr>
-        </thead>
-        <tbody id="sensitivityBody"></tbody>
-      </table>
+      <div class="table-responsive">
+        <table id="sensitivityTable">
+          <thead>
+            <tr>
+              <th>WACC \ Realization</th>
+              <th>35%</th>
+              <th>50%</th>
+              <th>65%</th>
+              <th>80%</th>
+              <th>95%</th>
+            </tr>
+          </thead>
+          <tbody id="sensitivityBody"></tbody>
+        </table>
+      </div>
     </div>
 
     <div class="wizard-nav">
@@ -620,67 +693,73 @@
     </div>
 
     <div class="rpt-section-title">1. Multi-Year Cash Flow Schedule & Financial Returns</div>
-    <table class="rpt-table" id="rptCashFlowTable">
-      <thead>
-        <tr>
-          <th>Period</th>
-          <th>Capital Outlay (CapEx)</th>
-          <th>Annual Run OpEx</th>
-          <th>Projected Gross Benefit</th>
-          <th>Realized Cash Flow</th>
-          <th>Net Cash Flow</th>
-          <th>Discounted PV (@ WACC)</th>
-        </tr>
-      </thead>
-      <tbody id="rptCashFlowBody"></tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="rpt-table" id="rptCashFlowTable">
+        <thead>
+          <tr>
+            <th>Period</th>
+            <th>Capital Outlay (CapEx)</th>
+            <th>Annual Run OpEx</th>
+            <th>Projected Gross Benefit</th>
+            <th>Realized Cash Flow</th>
+            <th>Net Cash Flow</th>
+            <th>Discounted PV (@ WACC)</th>
+          </tr>
+        </thead>
+        <tbody id="rptCashFlowBody"></tbody>
+      </table>
+    </div>
 
     <div class="rpt-section-title">2. Strategic Architecture: Build In-House vs. Commercial SaaS</div>
-    <table class="rpt-table">
-      <thead>
-        <tr>
-          <th>Evaluation Dimension</th>
-          <th>Option A: Build In-House</th>
-          <th>Option B: Buy Commercial SaaS</th>
-          <th>Recommendation Advantage</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><strong>3-Year Total Cost of Ownership (TCO)</strong></td>
-          <td id="rptTcoBuild">--</td>
-          <td id="rptTcoBuy">--</td>
-          <td id="rptAdvTco" style="font-weight:700;">--</td>
-        </tr>
-        <tr>
-          <td><strong>3-Year Net Present Value (NPV)</strong></td>
-          <td id="rptNpvBuild">--</td>
-          <td id="rptNpvBuy">--</td>
-          <td id="rptAdvNpv" style="font-weight:700;">--</td>
-        </tr>
-        <tr>
-          <td><strong>Cumulative Payback Horizon</strong></td>
-          <td id="rptPayBuild">--</td>
-          <td id="rptPayBuy">--</td>
-          <td id="rptAdvPay" style="font-weight:700;">--</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>Evaluation Dimension</th>
+            <th>Option A: Build In-House</th>
+            <th>Option B: Buy Commercial SaaS</th>
+            <th>Recommendation Advantage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>3-Year Total Cost of Ownership (TCO)</strong></td>
+            <td id="rptTcoBuild">--</td>
+            <td id="rptTcoBuy">--</td>
+            <td id="rptAdvTco" style="font-weight:700;">--</td>
+          </tr>
+          <tr>
+            <td><strong>3-Year Net Present Value (NPV)</strong></td>
+            <td id="rptNpvBuild">--</td>
+            <td id="rptNpvBuy">--</td>
+            <td id="rptAdvNpv" style="font-weight:700;">--</td>
+          </tr>
+          <tr>
+            <td><strong>Cumulative Payback Horizon</strong></td>
+            <td id="rptPayBuild">--</td>
+            <td id="rptPayBuy">--</td>
+            <td id="rptAdvPay" style="font-weight:700;">--</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <div class="rpt-section-title">3. Hurdle Rate & Cash Realization Sensitivity Analysis</div>
-    <table class="rpt-table">
-      <thead>
-        <tr>
-          <th>WACC Rate \ Cash Realization</th>
-          <th>35% (Adoption Risk)</th>
-          <th>50% (Base Defensible)</th>
-          <th>65% (Healthy)</th>
-          <th>80% (High Conversion)</th>
-          <th>95% (Full Expansion)</th>
-        </tr>
-      </thead>
-      <tbody id="rptSensitivityBody"></tbody>
-    </table>
+    <div class="table-responsive">
+      <table class="rpt-table">
+        <thead>
+          <tr>
+            <th>WACC Rate \ Cash Realization</th>
+            <th>35% (Adoption Risk)</th>
+            <th>50% (Base Defensible)</th>
+            <th>65% (Healthy)</th>
+            <th>80% (High Conversion)</th>
+            <th>95% (Full Expansion)</th>
+          </tr>
+        </thead>
+        <tbody id="rptSensitivityBody"></tbody>
+      </table>
+    </div>
 
     <div class="rpt-footer">
       <div>Enterprise AI Capital Allocation Framework • Grounded in Hurdle Rates, ROIC & Stage Gates</div>
@@ -696,7 +775,6 @@
 <script>
   'use strict';
 
-  // Internal state cache for financial outputs
   const modelState = {
     npv: 0,
     roic: 0,
@@ -828,7 +906,6 @@
       const paybackEl = document.getElementById('paybackVal');
       if (paybackEl) paybackEl.textContent = paybackRes.formatted;
 
-      // Class-based dynamic verdict updates
       const verdictBox = document.getElementById('verdictBox');
       const verdictTitle = document.getElementById('verdictTitle');
       const verdictDesc = document.getElementById('verdictDesc');
@@ -906,12 +983,10 @@
       document.getElementById('rptStage').textContent = stage;
       document.getElementById('rptDate').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-      // Copy KPIs
       document.getElementById('rptNpv').textContent = formatMoney(modelState.npv);
       document.getElementById('rptRoic').textContent = modelState.roic.toFixed(1) + "%";
       document.getElementById('rptPayback').textContent = modelState.paybackFormatted;
 
-      // Copy Verdict
       const vBox = document.getElementById('rptVerdictBox');
       const vTitle = document.getElementById('rptVerdictTitle');
       const vDesc = document.getElementById('rptVerdictDesc');
@@ -925,7 +1000,6 @@
       else if (srcTitle.includes('HOLD')) vBox.classList.add('rpt-verdict-hold');
       else vBox.classList.add('rpt-verdict-terminated');
 
-      // Populate Cash Flow Schedule
       const cfBody = document.getElementById('rptCashFlowBody');
       while (cfBody.firstChild) cfBody.removeChild(cfBody.firstChild);
 
@@ -943,7 +1017,6 @@
         cfBody.appendChild(tr);
       });
 
-      // Populate Build vs Buy
       document.getElementById('rptTcoBuild').textContent = document.getElementById('bbTcoBuild')?.textContent;
       document.getElementById('rptTcoBuy').textContent = document.getElementById('bbTcoBuy')?.textContent;
       document.getElementById('rptAdvTco').textContent = document.getElementById('bbAdvTco')?.textContent;
@@ -956,7 +1029,6 @@
       document.getElementById('rptPayBuy').textContent = document.getElementById('bbPayBuy')?.textContent;
       document.getElementById('rptAdvPay').textContent = document.getElementById('bbAdvPay')?.textContent;
 
-      // Populate Sensitivity in Print
       const rptSensBody = document.getElementById('rptSensitivityBody');
       while (rptSensBody.firstChild) rptSensBody.removeChild(rptSensBody.firstChild);
 
@@ -1378,6 +1450,12 @@
       });
     });
 
+    document.getElementById('btnToggleMenu')?.addEventListener('click', (e) => {
+      const menu = document.getElementById('headerMenu');
+      const isExpanded = menu.classList.toggle('is-collapsed');
+      e.currentTarget.setAttribute('aria-expanded', !isExpanded);
+    });
+
     document.getElementById('projectName')?.addEventListener('input', () => { calculate(); debouncedAutoSave(); });
     document.getElementById('stage')?.addEventListener('change', () => { calculate(); debouncedAutoSave(); });
 
@@ -1405,7 +1483,6 @@
     document.getElementById('btnExportCSV')?.addEventListener('click', exportCSV);
     document.getElementById('btnEncryptExport')?.addEventListener('click', exportEncryptedFile);
     
-    // Print triggers
     document.getElementById('btnPrint')?.addEventListener('click', triggerPrintReport);
     document.getElementById('btnPrintSummary')?.addEventListener('click', triggerPrintReport);
 
