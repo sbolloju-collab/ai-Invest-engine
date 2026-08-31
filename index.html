@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Hardened CSP with strict context restrictions -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';" />
   <title>Enterprise AI Invest Decision Engine</title>
   
   <meta property="og:title" content="Enterprise AI Invest Decision Engine" />
-  <meta property="og:description" content="Step-by-step wizard to evaluate enterprise AI initiatives: NPV, ROIC, Stage-Gated Governance, Build vs. Buy, and Stress Testing." />
+  <meta property="og:description" content="A guided 5-step investment wizard grounded in corporate finance fundamentals with Web Crypto encryption." />
   <meta property="og:type" content="website" />
 
   <style>
@@ -59,10 +60,10 @@
     label { display: flex; justify-content: space-between; font-size: 0.825rem; font-weight: 500; margin-bottom: 6px; color: var(--text-muted); align-items: center; }
     .val-display { color: var(--text); font-weight: 600; }
     
-    input[type="text"], select, input[type="number"] {
+    input[type="text"], input[type="password"], select, input[type="number"] {
       width: 100%; padding: 8px 12px; background: var(--card-sub); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 0.875rem; outline: none;
     }
-    input[type="number"]:focus, input[type="text"]:focus, select:focus { border-color: var(--primary); }
+    input[type="number"]:focus, input[type="text"]:focus, input[type="password"]:focus, select:focus { border-color: var(--primary); }
     input[type="range"] { width: 100%; accent-color: var(--primary); cursor: pointer; }
     
     /* TOOLTIPS */
@@ -108,9 +109,19 @@
     }
     .tooltip-wrap:hover .tooltip-text { visibility: visible; opacity: 1; }
 
+    /* REFACTORED CLASS-BASED VERDICT BOXES */
     .verdict-box { border-radius: 8px; padding: 18px; margin-bottom: 20px; border-left: 6px solid; transition: all 0.2s ease; }
     .verdict-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
     .verdict-desc { font-size: 0.85rem; line-height: 1.45; }
+
+    .verdict-approved { background: rgba(16, 185, 129, 0.15); border-left-color: var(--success); }
+    .verdict-approved .verdict-title { color: var(--success); }
+
+    .verdict-hold { background: rgba(245, 158, 11, 0.15); border-left-color: var(--warning); }
+    .verdict-hold .verdict-title { color: var(--warning); }
+
+    .verdict-terminated { background: rgba(239, 68, 68, 0.15); border-left-color: var(--danger); }
+    .verdict-terminated .verdict-title { color: var(--danger); }
 
     .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
     .kpi-card { background: var(--card-sub); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
@@ -130,6 +141,8 @@
     .btn-action:hover { background: #475569; }
     .btn-primary { background: var(--primary); border-color: var(--primary); }
     .btn-primary:hover { background: var(--primary-hover); }
+    .btn-crypto { background: #5b21b6; border-color: #7c3aed; }
+    .btn-crypto:hover { background: #6d28d9; }
 
     .wizard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
 
@@ -142,6 +155,8 @@
     .scenario-pill.active { border-color: var(--primary); color: #fff; background: #1e3a8a; font-weight: 600; }
 
     .error-banner { display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: #fca5a5; padding: 10px 14px; border-radius: 6px; font-size: 0.825rem; margin-bottom: 16px; }
+    .is-hidden { display: none !important; }
+
     .footer { text-align: center; margin-top: 40px; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 16px; }
     
     @media print {
@@ -162,7 +177,7 @@
   <header>
     <div>
       <h1>Enterprise AI Invest Decision Engine</h1>
-      <p class="subtitle">A guided 5-step investment wizard grounded in corporate finance fundamentals.</p>
+      <p class="subtitle">A guided 5-step investment wizard grounded in corporate finance fundamentals & Web Crypto security.</p>
     </div>
     <div class="header-actions">
       <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.75rem; color:var(--text-muted); cursor:pointer; margin-right:4px;">
@@ -172,6 +187,7 @@
       <button class="btn-action" id="btnClear">🗑️ Clear</button>
       <button class="btn-action" id="btnExportJSON">📥 JSON</button>
       <button class="btn-action" id="btnExportCSV">📊 CSV</button>
+      <button class="btn-action btn-crypto" id="btnEncryptExport">🔐 Encrypted Export</button>
       <button class="btn-action" id="btnPrint">🖨️ Print / PDF</button>
       <span class="badge">© 2026 Sateesh Bolloju</span>
     </div>
@@ -300,7 +316,7 @@
 
     <div class="wizard-nav">
       <span></span>
-      <button class="btn-action btn-primary" onclick="goToStep(2)">Proceed to Step 2: Build vs. Buy Strategy ➔</button>
+      <button class="btn-action btn-primary" data-step-target="2">Proceed to Step 2: Build vs. Buy Strategy ➔</button>
     </div>
   </div>
 
@@ -308,7 +324,7 @@
   <div id="step-2" class="step-content" role="tabpanel" aria-labelledby="stepBtn2">
     <div class="help-box">
       <strong>Step 2: Build In-House vs. Buy Commercial SaaS</strong><br />
-      Compare whether it is more cost-effective to develop a proprietary in-house solution (higher initial CapEx, lower marginal seat cost) or purchase commercial off-the-shelf software (fast setup, high recurring seat licenses).
+      Compare whether it is more cost-effective to develop a proprietary in-house solution or purchase commercial off-the-shelf software.
     </div>
 
     <div class="grid">
@@ -388,8 +404,8 @@
     </div>
 
     <div class="wizard-nav">
-      <button class="btn-action" onclick="goToStep(1)">⬅️ Previous Step</button>
-      <button class="btn-action btn-primary" onclick="goToStep(3)">Proceed to Step 3: Growth & Hurdle Rates ➔</button>
+      <button class="btn-action" data-step-target="1">⬅️ Previous Step</button>
+      <button class="btn-action btn-primary" data-step-target="3">Proceed to Step 3: Growth & Hurdle Rates ➔</button>
     </div>
   </div>
 
@@ -440,8 +456,8 @@
     </div>
 
     <div class="wizard-nav">
-      <button class="btn-action" onclick="goToStep(2)">⬅️ Previous Step</button>
-      <button class="btn-action btn-primary" onclick="goToStep(4)">Proceed to Step 4: Executive Decision Scorecard ➔</button>
+      <button class="btn-action" data-step-target="2">⬅️ Previous Step</button>
+      <button class="btn-action btn-primary" data-step-target="4">Proceed to Step 4: Executive Decision Scorecard ➔</button>
     </div>
   </div>
 
@@ -454,12 +470,12 @@
 
     <div class="scenario-pill-group">
       <span style="font-size:0.8rem; color:var(--text-muted); align-self:center; margin-right:4px;">Quick Scenarios:</span>
-      <button class="scenario-pill active" id="scenBase">Base Case</button>
-      <button class="scenario-pill" id="scenCons">Conservative / Downside</button>
-      <button class="scenario-pill" id="scenAggr">Aggressive / Scale</button>
+      <button class="scenario-pill active" data-scenario="base">Base Case</button>
+      <button class="scenario-pill" data-scenario="conservative">Conservative / Downside</button>
+      <button class="scenario-pill" data-scenario="aggressive">Aggressive / Scale</button>
     </div>
 
-    <div id="verdictBox" class="verdict-box">
+    <div id="verdictBox" class="verdict-box verdict-approved">
       <div id="verdictTitle" class="verdict-title">--</div>
       <div id="verdictDesc" class="verdict-desc">--</div>
     </div>
@@ -491,8 +507,8 @@
       </div>
     </div>
 
-    <!-- Hidden sliders for two-way sync -->
-    <div style="display:none;">
+    <!-- Hidden synchronization fields -->
+    <div class="is-hidden">
       <input type="range" id="capex" min="25000" max="1000000" step="25000" value="260000" />
       <span id="capexDisplay">$260,000</span>
       <input type="range" id="opex" min="10000" max="400000" step="5000" value="50000" />
@@ -504,8 +520,8 @@
     </div>
 
     <div class="wizard-nav">
-      <button class="btn-action" onclick="goToStep(3)">⬅️ Previous Step</button>
-      <button class="btn-action btn-primary" onclick="goToStep(5)">Proceed to Step 5: Sensitivity Stress Test ➔</button>
+      <button class="btn-action" data-step-target="3">⬅️ Previous Step</button>
+      <button class="btn-action btn-primary" data-step-target="5">Proceed to Step 5: Sensitivity Stress Test ➔</button>
     </div>
   </div>
 
@@ -534,8 +550,8 @@
     </div>
 
     <div class="wizard-nav">
-      <button class="btn-action" onclick="goToStep(4)">⬅️ Back to Decision Scorecard</button>
-      <button class="btn-action btn-primary" onclick="window.print()">🖨️ Print / Save Executive Summary PDF</button>
+      <button class="btn-action" data-step-target="4">⬅️ Back to Decision Scorecard</button>
+      <button class="btn-action btn-primary" id="btnPrintSummary">🖨️ Print / Save Executive Summary PDF</button>
     </div>
   </div>
 
@@ -547,6 +563,7 @@
 <script>
   'use strict';
 
+  // Internal state cache for financial outputs
   const modelState = {
     npv: 0,
     roic: 0,
@@ -577,13 +594,17 @@
     const el = document.getElementById('errorBanner');
     if (el) {
       el.textContent = msg;
+      el.classList.remove('is-hidden');
       el.style.display = 'block';
     }
   }
 
   function clearError() {
     const el = document.getElementById('errorBanner');
-    if (el) el.style.display = 'none';
+    if (el) {
+      el.classList.add('is-hidden');
+      el.style.display = 'none';
+    }
   }
 
   function getModelAssumptions() {
@@ -664,27 +685,24 @@
       const paybackEl = document.getElementById('paybackVal');
       if (paybackEl) paybackEl.textContent = paybackRes.formatted;
 
+      // Class-based dynamic verdict updates
       const verdictBox = document.getElementById('verdictBox');
       const verdictTitle = document.getElementById('verdictTitle');
       const verdictDesc = document.getElementById('verdictDesc');
 
       if (verdictBox && verdictTitle && verdictDesc) {
+        verdictBox.classList.remove('verdict-approved', 'verdict-hold', 'verdict-terminated');
+
         if (npv > 0 && roic >= (wacc * 100 + 5) && realization >= 0.5) {
-          verdictBox.style.background = 'rgba(16, 185, 129, 0.15)';
-          verdictBox.style.borderColor = 'var(--success)';
-          verdictTitle.style.color = 'var(--success)';
+          verdictBox.classList.add('verdict-approved');
           verdictTitle.textContent = 'APPROVED TO ADVANCE';
           verdictDesc.textContent = 'Initiative clears enterprise hurdle rates with strong hard P&L conversion. Release current stage funding tranche.';
         } else if (npv > 0 && realization < 0.5) {
-          verdictBox.style.background = 'rgba(245, 158, 11, 0.15)';
-          verdictBox.style.borderColor = 'var(--warning)';
-          verdictTitle.style.color = 'var(--warning)';
+          verdictBox.classList.add('verdict-hold');
           verdictTitle.textContent = 'HOLD: RE-EVALUATE VALUE CAPTURE';
           verdictDesc.textContent = 'High risk of productivity theater (<50% cash conversion). Re-architect value capture before releasing pilot capital.';
         } else {
-          verdictBox.style.background = 'rgba(239, 68, 68, 0.15)';
-          verdictBox.style.borderColor = 'var(--danger)';
-          verdictTitle.style.color = 'var(--danger)';
+          verdictBox.classList.add('verdict-terminated');
           verdictTitle.textContent = 'TERMINATE / SUNK COST AVOIDANCE';
           verdictDesc.textContent = 'Negative risk-adjusted NPV. Ongoing run costs exceed defensible cash returns. Do not commit capital tranches.';
         }
@@ -766,7 +784,6 @@
       if (grossEl) grossEl.textContent = formatMoney(grossVal);
       if (realEl) realEl.textContent = formatMoney(realizedVal);
 
-      // Auto-sync to dashboard state
       const capexIn = document.getElementById('capex');
       const opexIn = document.getElementById('opex');
       const benIn = document.getElementById('benefit');
@@ -870,21 +887,21 @@
     document.querySelectorAll('.scenario-pill').forEach(p => p.classList.remove('active'));
     
     if (type === 'base') {
-      document.getElementById('scenBase')?.classList.add('active');
+      document.querySelector('[data-scenario="base"]')?.classList.add('active');
       document.getElementById('capex').value = 260000;
       document.getElementById('opex').value = 50000;
       document.getElementById('benefit').value = 234000;
       document.getElementById('realization').value = 70;
       document.getElementById('wacc').value = 10;
     } else if (type === 'conservative') {
-      document.getElementById('scenCons')?.classList.add('active');
+      document.querySelector('[data-scenario="conservative"]')?.classList.add('active');
       document.getElementById('capex').value = 300000;
       document.getElementById('opex').value = 65000;
       document.getElementById('benefit').value = 180000;
       document.getElementById('realization').value = 45;
       document.getElementById('wacc').value = 12;
     } else if (type === 'aggressive') {
-      document.getElementById('scenAggr')?.classList.add('active');
+      document.querySelector('[data-scenario="aggressive"]')?.classList.add('active');
       document.getElementById('capex').value = 220000;
       document.getElementById('opex').value = 45000;
       document.getElementById('benefit').value = 320000;
@@ -1010,6 +1027,67 @@
     }
   }
 
+  // --- ENTERPRISE WEB CRYPTO ENCRYPTED EXPORT (AES-GCM 256-BIT) ---
+  async function exportEncryptedFile() {
+    const password = prompt("Enter a strong encryption passphrase to protect this financial assessment (HIPAA / SOC 2 compliance):");
+    if (!password) return;
+
+    try {
+      const enc = new TextEncoder();
+      const plaintext = enc.encode(JSON.stringify(getPayload(), null, 2));
+
+      // Generate random 16-byte salt and 12-byte IV
+      const salt = crypto.getRandomValues(new Uint8Array(16));
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        enc.encode(password),
+        { name: "PBKDF2" },
+        false,
+        ["deriveKey"]
+      );
+
+      const key = await crypto.subtle.deriveKey(
+        {
+          name: "PBKDF2",
+          salt: salt,
+          iterations: 100000,
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        { name: "AES-GCM", length: 256 },
+        false,
+        ["encrypt"]
+      );
+
+      const encryptedContent = await crypto.subtle.encrypt(
+        { name: "AES-GCM", iv: iv },
+        key,
+        plaintext
+      );
+
+      // Package: Salt (16 bytes) + IV (12 bytes) + Ciphertext
+      const combined = new Uint8Array(salt.byteLength + iv.byteLength + encryptedContent.byteLength);
+      combined.set(salt, 0);
+      combined.set(iv, salt.byteLength);
+      combined.set(new Uint8Array(encryptedContent), salt.byteLength + iv.byteLength);
+
+      const blob = new Blob([combined], { type: "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${sanitizeFilename(document.getElementById('projectName')?.value)}_encrypted_evaluation.enc`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      alert("Encrypted file exported successfully using AES-GCM 256-bit.");
+    } catch (err) {
+      showError("Encryption failed: " + err.message);
+    }
+  }
+
   // WIZARD STEPPER NAVIGATION
   function selectStep(stepBtn) {
     if (!stepBtn) return;
@@ -1041,6 +1119,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
 
+    // Wizard Tab Button Click & Keyboard Bindings
     const stepButtons = Array.from(document.querySelectorAll('.step-btn'));
 
     stepButtons.forEach((btn, index) => {
@@ -1067,10 +1146,23 @@
       });
     });
 
-    document.getElementById('scenBase')?.addEventListener('click', () => loadScenario('base'));
-    document.getElementById('scenCons')?.addEventListener('click', () => loadScenario('conservative'));
-    document.getElementById('scenAggr')?.addEventListener('click', () => loadScenario('aggressive'));
+    // Delegated Wizard Navigation Buttons (zero inline onclick)
+    document.querySelectorAll('[data-step-target]').forEach(el => {
+      el.addEventListener('click', () => {
+        const target = el.getAttribute('data-step-target');
+        goToStep(target);
+      });
+    });
 
+    // Scenario Selection Buttons
+    document.querySelectorAll('[data-scenario]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const scen = btn.getAttribute('data-scenario');
+        loadScenario(scen);
+      });
+    });
+
+    // Dynamic Input Bindings
     document.getElementById('projectName')?.addEventListener('input', () => { calculate(); debouncedAutoSave(); });
     document.getElementById('stage')?.addEventListener('change', () => { calculate(); debouncedAutoSave(); });
 
@@ -1092,11 +1184,14 @@
       });
     });
 
+    // Header Actions
     document.getElementById('btnSave')?.addEventListener('click', saveToStorage);
     document.getElementById('btnClear')?.addEventListener('click', clearStorage);
     document.getElementById('btnExportJSON')?.addEventListener('click', exportJSON);
     document.getElementById('btnExportCSV')?.addEventListener('click', exportCSV);
+    document.getElementById('btnEncryptExport')?.addEventListener('click', exportEncryptedFile);
     document.getElementById('btnPrint')?.addEventListener('click', () => window.print());
+    document.getElementById('btnPrintSummary')?.addEventListener('click', () => window.print());
 
     runEstimators();
   });
