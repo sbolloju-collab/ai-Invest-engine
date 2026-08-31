@@ -7,7 +7,7 @@
   <title>Enterprise AI Invest Decision Engine</title>
   
   <meta property="og:title" content="Enterprise AI Invest Decision Engine" />
-  <meta property="og:description" content="Evaluate enterprise AI initiatives with corporate finance fundamentals: NPV, ROIC, Stage-Gated Governance, Scenario Comparison, and Build vs. Buy analysis." />
+  <meta property="og:description" content="Step-by-step wizard to evaluate enterprise AI initiatives: NPV, ROIC, Stage-Gated Governance, Build vs. Buy, and Stress Testing." />
   <meta property="og:type" content="website" />
 
   <style>
@@ -28,7 +28,7 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; }
-    .container { max-width: 1280px; margin: 0 auto; }
+    .container { max-width: 1200px; margin: 0 auto; }
     
     header { margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px; }
     h1 { font-size: 1.55rem; font-weight: 700; color: #f8fafc; }
@@ -36,20 +36,24 @@
     .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .badge { background: #1e3a8a; color: #93c5fd; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; border: 1px solid #3b82f6; }
 
-    .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 8px; overflow-x: auto; }
-    .tab-btn { background: transparent; border: 1px solid transparent; color: var(--text-muted); padding: 8px 16px; border-radius: 6px; font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-    .tab-btn:hover { color: var(--text); background: #1e293b; }
-    .tab-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-    .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    /* WIZARD PROGRESS STEPPER */
+    .wizard-stepper { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 12px; overflow-x: auto; }
+    .step-btn { background: var(--card-sub); border: 1px solid var(--border); color: var(--text-muted); padding: 10px 16px; border-radius: 8px; font-size: 0.825rem; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+    .step-btn:hover { color: var(--text); background: #1e293b; }
+    .step-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .step-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
+    .step-num { background: rgba(0,0,0,0.3); border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; }
 
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+    .step-content { display: none; }
+    .step-content.active { display: block; }
 
-    .grid { display: grid; grid-template-columns: 1fr 1.25fr; gap: 24px; }
-    @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 
     .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
     .card-title { font-size: 0.975rem; font-weight: 600; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; color: #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+
+    .help-box { background: rgba(59, 130, 246, 0.08); border-left: 4px solid var(--primary); padding: 12px 16px; border-radius: 6px; font-size: 0.825rem; color: #cbd5e1; margin-bottom: 18px; }
 
     .form-group { margin-bottom: 14px; }
     label { display: flex; justify-content: space-between; font-size: 0.825rem; font-weight: 500; margin-bottom: 6px; color: var(--text-muted); align-items: center; }
@@ -61,6 +65,7 @@
     input[type="number"]:focus, input[type="text"]:focus, select:focus { border-color: var(--primary); }
     input[type="range"] { width: 100%; accent-color: var(--primary); cursor: pointer; }
     
+    /* TOOLTIPS */
     .tooltip-wrap {
       position: relative;
       display: inline-flex;
@@ -103,17 +108,17 @@
     }
     .tooltip-wrap:hover .tooltip-text { visibility: visible; opacity: 1; }
 
-    .verdict-box { border-radius: 8px; padding: 16px; margin-bottom: 20px; border-left: 5px solid; transition: all 0.2s ease; }
-    .verdict-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-    .verdict-desc { font-size: 0.825rem; }
+    .verdict-box { border-radius: 8px; padding: 18px; margin-bottom: 20px; border-left: 6px solid; transition: all 0.2s ease; }
+    .verdict-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .verdict-desc { font-size: 0.85rem; line-height: 1.45; }
 
-    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    .kpi-card { background: var(--card-sub); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+    .kpi-card { background: var(--card-sub); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
     .kpi-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .kpi-val { font-size: 1.15rem; font-weight: 700; margin-top: 6px; }
+    .kpi-val { font-size: 1.25rem; font-weight: 700; margin-top: 6px; }
 
     table { width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: right; }
-    th, td { padding: 8px 10px; border: 1px solid var(--border); }
+    th, td { padding: 9px 12px; border: 1px solid var(--border); }
     th { background: var(--card-sub); color: var(--text-muted); font-weight: 600; text-align: right; }
     th:first-child, td:first-child { text-align: left; }
     .highlight-cell { outline: 2px solid var(--primary); background: rgba(59, 130, 246, 0.2) !important; font-weight: 700; }
@@ -121,14 +126,16 @@
     .pos { color: var(--success); }
     .neg { color: var(--danger); }
 
-    .btn-action { background: #334155; color: #fff; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-action { background: #334155; color: #fff; padding: 8px 14px; border-radius: 6px; border: 1px solid var(--border); font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
     .btn-action:hover { background: #475569; }
     .btn-primary { background: var(--primary); border-color: var(--primary); }
     .btn-primary:hover { background: var(--primary-hover); }
 
-    .calc-box { background: var(--card-sub); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-top: 10px; }
-    .calc-row { display: flex; justify-content: space-between; font-size: 0.825rem; padding: 4px 0; border-bottom: 1px dashed #1e293b; }
-    .calc-row:last-child { border-bottom: none; font-weight: 700; color: #60a5fa; }
+    .wizard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+    .calc-box { background: var(--card-sub); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-top: 12px; }
+    .calc-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 5px 0; border-bottom: 1px dashed #1e293b; }
+    .calc-row:last-child { border-bottom: none; font-weight: 700; color: #60a5fa; font-size: 0.9rem; }
 
     .scenario-pill-group { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
     .scenario-pill { padding: 6px 12px; font-size: 0.775rem; border-radius: 6px; border: 1px solid var(--border); background: var(--card-sub); color: var(--text-muted); cursor: pointer; }
@@ -139,11 +146,11 @@
     
     @media print {
       body { background: #fff; color: #000; padding: 0; }
-      .tabs, .header-actions, .footer, input[type="range"], .btn-action, .tooltip-text, .scenario-pill-group { display: none !important; }
+      .wizard-stepper, .wizard-nav, .header-actions, .footer, input[type="range"], .btn-action, .tooltip-text, .scenario-pill-group { display: none !important; }
       .card { background: #fff; border: 1px solid #ccc; color: #000; break-inside: avoid; }
       .kpi-card { background: #f8fafc; border: 1px solid #ccc; color: #000; }
       th { background: #f1f5f9; color: #000; }
-      .tab-content { display: block !important; }
+      .step-content { display: block !important; }
     }
   </style>
 </head>
@@ -155,7 +162,7 @@
   <header>
     <div>
       <h1>Enterprise AI Invest Decision Engine</h1>
-      <p class="subtitle">Grounded in corporate finance fundamentals: Hurdle rates, cash realization, scenario comparison, and staged gating.</p>
+      <p class="subtitle">A guided 5-step investment wizard grounded in corporate finance fundamentals.</p>
     </div>
     <div class="header-actions">
       <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.75rem; color:var(--text-muted); cursor:pointer; margin-right:4px;">
@@ -170,157 +177,59 @@
     </div>
   </header>
 
-  <!-- ACCESSIBLE TAB NAVIGATION -->
-  <div class="tabs" role="tablist" aria-label="Investment Decision Sections">
-    <button class="tab-btn active" role="tab" id="tabBtnDashboard" aria-selected="true" aria-controls="tab-dashboard" tabindex="0">📊 1. Decision Dashboard</button>
-    <button class="tab-btn" role="tab" id="tabBtnEstimators" aria-selected="false" aria-controls="tab-estimators" tabindex="-1">🧮 2. Non-Finance Cost & Value Estimator</button>
-    <button class="tab-btn" role="tab" id="tabBtnBuildbuy" aria-selected="false" aria-controls="tab-buildbuy" tabindex="-1">⚖️ 3. Build vs. Buy Analysis</button>
-    <button class="tab-btn" role="tab" id="tabBtnAssumptions" aria-selected="false" aria-controls="tab-assumptions" tabindex="-1">⚙️ 4. Model Assumptions & Scenarios</button>
+  <!-- GUIDED 5-STEP WIZARD PROGRESS STEPPER -->
+  <div class="wizard-stepper" role="tablist" aria-label="Investment Decision Wizard Steps">
+    <button class="step-btn active" role="tab" id="stepBtn1" aria-selected="true" aria-controls="step-1" tabindex="0">
+      <span class="step-num">1</span> Project & Cost Estimator
+    </button>
+    <button class="step-btn" role="tab" id="stepBtn2" aria-selected="false" aria-controls="step-2" tabindex="-1">
+      <span class="step-num">2</span> Build vs. Buy Strategy
+    </button>
+    <button class="step-btn" role="tab" id="stepBtn3" aria-selected="false" aria-controls="step-3" tabindex="-1">
+      <span class="step-num">3</span> Growth & Hurdle Rates
+    </button>
+    <button class="step-btn" role="tab" id="stepBtn4" aria-selected="false" aria-controls="step-4" tabindex="-1">
+      <span class="step-num">4</span> Decision Scorecard
+    </button>
+    <button class="step-btn" role="tab" id="stepBtn5" aria-selected="false" aria-controls="step-5" tabindex="-1">
+      <span class="step-num">5</span> Sensitivity Stress Test
+    </button>
   </div>
 
-  <!-- TAB 1: EXECUTIVE DECISION DASHBOARD -->
-  <div id="tab-dashboard" class="tab-content active" role="tabpanel" aria-labelledby="tabBtnDashboard">
-    
-    <div class="scenario-pill-group">
-      <span style="font-size:0.8rem; color:var(--text-muted); align-self:center; margin-right:4px;">Quick Scenario:</span>
-      <button class="scenario-pill active" id="scenBase">Base Case</button>
-      <button class="scenario-pill" id="scenCons">Conservative / Downside</button>
-      <button class="scenario-pill" id="scenAggr">Aggressive / Scale</button>
+  <!-- STEP 1: NON-FINANCE PROJECT & COST ESTIMATOR -->
+  <div id="step-1" class="step-content active" role="tabpanel" aria-labelledby="stepBtn1">
+    <div class="help-box">
+      <strong>Step 1: Estimate Total Investment & Real P&L Cash Value</strong><br />
+      Enter your operational numbers (team months, seats, hourly wages) without worrying about complex accounting formulas. We will calculate CapEx, OpEx, and True Cash Flow for you.
+    </div>
+
+    <div class="card">
+      <div class="card-title">Project Profile & Current Stage Gate</div>
+      <div class="grid">
+        <div class="form-group">
+          <label for="projectName">AI Initiative Name</label>
+          <input type="text" id="projectName" value="Customer Operations & Contract Copilot" maxlength="100" />
+        </div>
+        <div class="form-group">
+          <label for="stage">
+            <span class="tooltip-wrap">Stage-Gate Funding Stage
+              <span class="tooltip-text">Governance gate releasing capital in tranches (Discovery ➔ Pilot ➔ Production ➔ Scale) against operational milestones.</span>
+            </span>
+          </label>
+          <select id="stage">
+            <option value="Discovery">Discovery / Feasibility ($50k-$150k)</option>
+            <option value="Pilot" selected>Pilot / Prototype ($150k-$400k)</option>
+            <option value="Production">Production Rollout</option>
+            <option value="Scale">Enterprise Scale</option>
+          </select>
+        </div>
+      </div>
     </div>
 
     <div class="grid">
       <div>
         <div class="card">
-          <div class="card-title">Project Scope & Governance Stage</div>
-          <div class="form-group">
-            <label for="projectName">Project Name</label>
-            <input type="text" id="projectName" value="Customer Operations & Contract Copilot" maxlength="100" />
-          </div>
-          <div class="form-group">
-            <label for="stage">
-              <span class="tooltip-wrap">Stage-Gate Funding Stage
-                <span class="tooltip-text">Governance gate releasing capital in tranches (Discovery ➔ Pilot ➔ Production ➔ Scale) against operational milestones.</span>
-              </span>
-            </label>
-            <select id="stage">
-              <option value="Discovery">Discovery / Feasibility ($50k-$150k)</option>
-              <option value="Pilot" selected>Pilot / Prototype ($150k-$400k)</option>
-              <option value="Production">Production Rollout</option>
-              <option value="Scale">Enterprise Scale</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="capex">
-              <span class="tooltip-wrap">Upfront CapEx ($)
-                <span class="tooltip-text"><strong>CapEx:</strong> Upfront build, custom pipeline engineering, security audit, and data integration capital outlay.</span>
-              </span>
-              <span class="val-display" id="capexDisplay">$260,000</span>
-            </label>
-            <input type="range" id="capex" min="25000" max="1000000" step="25000" value="260000" aria-valuemin="25000" aria-valuemax="1000000" aria-valuenow="260000" />
-          </div>
-          <div class="form-group">
-            <label for="opex">
-              <span class="tooltip-wrap">Annual Run OpEx ($)
-                <span class="tooltip-text"><strong>OpEx:</strong> Recurring annual cash costs including GPU/token compute, drift retraining, data curation, and ongoing infosec.</span>
-              </span>
-              <span class="val-display" id="opexDisplay">$50,000</span>
-            </label>
-            <input type="range" id="opex" min="10000" max="400000" step="5000" value="50000" aria-valuemin="10000" aria-valuemax="400000" aria-valuenow="50000" />
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">Value Capture & Cost of Capital</div>
-          <div class="form-group">
-            <label for="benefit">
-              <span class="tooltip-wrap">Projected Annual Gross Value ($)
-                <span class="tooltip-text"><strong>Gross Benefit:</strong> Total estimated theoretical business value before discounting for uncaptured saved time.</span>
-              </span>
-              <span class="val-display" id="benefitDisplay">$234,000</span>
-            </label>
-            <input type="range" id="benefit" min="50000" max="1000000" step="10000" value="234000" aria-valuemin="50000" aria-valuemax="1000000" aria-valuenow="234000" />
-          </div>
-          <div class="form-group">
-            <label for="realization">
-              <span class="tooltip-wrap">Hard Cash Realization Rate (%)
-                <span class="tooltip-text"><strong>Realization Rate:</strong> The percentage of saved hours that convert into real P&L savings or billable capacity vs. productivity theater.</span>
-              </span>
-              <span class="val-display" id="realizationDisplay">70%</span>
-            </label>
-            <input type="range" id="realization" min="20" max="100" step="5" value="70" aria-valuemin="20" aria-valuemax="100" aria-valuenow="70" />
-          </div>
-          <div class="form-group">
-            <label for="wacc">
-              <span class="tooltip-wrap">Hurdle Rate / WACC (%)
-                <span class="tooltip-text"><strong>Hurdle Rate (WACC):</strong> Minimum rate of return required to justify enterprise capital commitment.</span>
-              </span>
-              <span class="val-display" id="waccDisplay">10%</span>
-            </label>
-            <input type="range" id="wacc" min="4" max="18" step="1" value="10" aria-valuemin="4" aria-valuemax="18" aria-valuenow="10" />
-          </div>
-        </div>
-      </div>
-
-      <!-- RIGHT: DECISION & SENSITIVITY -->
-      <div>
-        <div id="verdictBox" class="verdict-box">
-          <div id="verdictTitle" class="verdict-title">--</div>
-          <div id="verdictDesc" class="verdict-desc">--</div>
-        </div>
-
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">
-              <span class="tooltip-wrap">3-Yr Net Present Value
-                <span class="tooltip-text">Present value of future net cash flows discounted at Hurdle Rate minus CapEx. Must be > $0.</span>
-              </span>
-            </div>
-            <div class="kpi-val" id="npvVal">--</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">
-              <span class="tooltip-wrap">Avg Return on Capital (ROIC)
-                <span class="tooltip-text">Average annual net cash flow over the horizon divided by upfront CapEx. Must clear Hurdle Rate.</span>
-              </span>
-            </div>
-            <div class="kpi-val" id="roicVal">--</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">
-              <span class="tooltip-wrap">Cumulative Payback
-                <span class="tooltip-text">Time in months/years required for cumulative cash inflows to recover upfront CapEx.</span>
-              </span>
-            </div>
-            <div class="kpi-val" id="paybackVal">--</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">2-Way Sensitivity Matrix (NPV vs. Hurdle & Realization)</div>
-          <table id="sensitivityTable">
-            <thead>
-              <tr>
-                <th>WACC \ Realization</th>
-                <th>35%</th>
-                <th>50%</th>
-                <th>65%</th>
-                <th>80%</th>
-                <th>95%</th>
-              </tr>
-            </thead>
-            <tbody id="sensitivityBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TAB 2: NON-FINANCE ESTIMATOR WIZARD -->
-  <div id="tab-estimators" class="tab-content" role="tabpanel" aria-labelledby="tabBtnEstimators">
-    <div class="grid">
-      <div>
-        <div class="card">
-          <div class="card-title">Step A: Calculate Upfront CapEx (Build Costs)</div>
+          <div class="card-title">A. Upfront Build Costs (CapEx)</div>
           <div class="form-group">
             <label for="estDevMonths">Internal Dev / Engineering Team (Months × $15k/mo FTE)</label>
             <input type="number" id="estDevMonths" value="12" min="0" max="60" />
@@ -334,12 +243,12 @@
             <input type="number" id="estDataPipelines" value="30000" min="0" step="5000" />
           </div>
           <div class="calc-box">
-            <div class="calc-row"><span>Estimated Total Initial CapEx:</span><span id="calcCapExTotal">$260,000</span></div>
+            <div class="calc-row"><span>Calculated Upfront CapEx:</span><span id="calcCapExTotal">$260,000</span></div>
           </div>
         </div>
 
         <div class="card">
-          <div class="card-title">Step B: Calculate Annual OpEx (Run Costs)</div>
+          <div class="card-title">B. Annual Run Costs (OpEx)</div>
           <div class="form-group">
             <label for="estUsers">Expected Active Users / Seats</label>
             <input type="number" id="estUsers" value="60" min="1" max="100000" />
@@ -353,14 +262,14 @@
             <input type="number" id="estAdminOpex" value="24800" min="0" step="1000" />
           </div>
           <div class="calc-box">
-            <div class="calc-row"><span>Estimated Annual Run OpEx:</span><span id="calcOpExTotal">$50,000</span></div>
+            <div class="calc-row"><span>Calculated Annual Run OpEx:</span><span id="calcOpExTotal">$50,000</span></div>
           </div>
         </div>
       </div>
 
       <div>
         <div class="card">
-          <div class="card-title">Step C: Calculate Value Capture & Realization Rate</div>
+          <div class="card-title">C. Value Capture & Cash Conversion</div>
           <div class="form-group">
             <label for="estEmpCount">Target Employees Impacted</label>
             <input type="number" id="estEmpCount" value="25" min="1" max="10000" />
@@ -374,33 +283,37 @@
             <input type="number" id="estHourlyWage" value="45" min="1" max="500" />
           </div>
           <div class="form-group">
-            <label for="estCaptureType">Value Capture Type (Determines Hard Cash Realization %)</label>
+            <label for="estCaptureType">Value Capture Type (Hard Cash Realization Rate)</label>
             <select id="estCaptureType">
               <option value="90">Direct Contractor / Agency Spend Elimination (90% Realization)</option>
               <option value="70" selected>Productivity Converted to Billable Work / Backlog Relief (70% Realization)</option>
-              <option value="35">General Time Savings / Soft Efficiency (35% Realization - Productivity Theater Risk)</option>
+              <option value="35">General Time Savings / Soft Efficiency (35% Realization - High Productivity Theater Risk)</option>
             </select>
           </div>
           <div class="calc-box">
             <div class="calc-row"><span>Gross Theoretical Value:</span><span id="calcGrossValue">$234,000</span></div>
-            <div class="calc-row"><span>Realized P&L Cash Flow:</span><span id="calcRealizedValue">$163,800</span></div>
+            <div class="calc-row"><span>Realized P&L Hard Cash Flow:</span><span id="calcRealizedValue">$163,800</span></div>
           </div>
-        </div>
-
-        <div class="card" style="text-align: center;">
-          <button class="btn-action btn-primary" id="btnApplyEstimates" style="padding: 10px 20px; font-size: 0.9rem;">
-            ⚡ Apply Estimates to Dashboard & Build vs. Buy
-          </button>
         </div>
       </div>
     </div>
+
+    <div class="wizard-nav">
+      <span></span>
+      <button class="btn-action btn-primary" onclick="goToStep(2)">Proceed to Step 2: Build vs. Buy Strategy ➔</button>
+    </div>
   </div>
 
-  <!-- TAB 3: BUILD VS BUY DECISION -->
-  <div id="tab-buildbuy" class="tab-content" role="tabpanel" aria-labelledby="tabBtnBuildbuy">
+  <!-- STEP 2: BUILD VS BUY STRATEGY -->
+  <div id="step-2" class="step-content" role="tabpanel" aria-labelledby="stepBtn2">
+    <div class="help-box">
+      <strong>Step 2: Build In-House vs. Buy Commercial SaaS</strong><br />
+      Compare whether it is more cost-effective to develop a proprietary in-house solution (higher initial CapEx, lower marginal seat cost) or purchase commercial off-the-shelf software (fast setup, high recurring seat licenses).
+    </div>
+
     <div class="grid">
       <div class="card">
-        <div class="card-title">Option A: Build In-House (Custom Model / Pipeline)</div>
+        <div class="card-title">Option A: Build In-House (Custom LLM / Pipeline)</div>
         <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">High initial capital investment, proprietary IP ownership, and lower recurring marginal software cost.</p>
         <div class="form-group">
           <label for="bbBuildCapex">Build Upfront CapEx ($)</label>
@@ -473,14 +386,35 @@
         <p id="bbVerdictDesc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Commercial COTS deployment provides lower initial capital risk and faster payback for current team scale.</p>
       </div>
     </div>
+
+    <div class="wizard-nav">
+      <button class="btn-action" onclick="goToStep(1)">⬅️ Previous Step</button>
+      <button class="btn-action btn-primary" onclick="goToStep(3)">Proceed to Step 3: Growth & Hurdle Rates ➔</button>
+    </div>
   </div>
 
-  <!-- TAB 4: MODEL ASSUMPTIONS & SCENARIOS -->
-  <div id="tab-assumptions" class="tab-content" role="tabpanel" aria-labelledby="tabBtnAssumptions">
+  <!-- STEP 3: GROWTH & HURDLE RATES -->
+  <div id="step-3" class="step-content" role="tabpanel" aria-labelledby="stepBtn3">
+    <div class="help-box">
+      <strong>Step 3: Define Growth Trajectory & Enterprise Hurdle Rate</strong><br />
+      Set the adoption growth curve, infrastructure escalation, and enterprise cost of capital (WACC) to ensure long-term viability.
+    </div>
+
     <div class="card">
-      <div class="card-title">Auditable Model Growth & Inflation Constants</div>
-      <p style="font-size: 0.825rem; color: var(--text-muted); margin-bottom: 16px;">Configure dynamic scaling curves across adoption expansion and operational infrastructure indexing.</p>
-      
+      <div class="card-title">Enterprise Cost of Capital (Hurdle Rate)</div>
+      <div class="form-group">
+        <label for="wacc">
+          <span class="tooltip-wrap">Hurdle Rate / WACC (%)
+            <span class="tooltip-text"><strong>Hurdle Rate (WACC):</strong> Minimum rate of return required to justify enterprise capital commitment.</span>
+          </span>
+          <span class="val-display" id="waccDisplay">10%</span>
+        </label>
+        <input type="range" id="wacc" min="4" max="18" step="1" value="10" aria-valuemin="4" aria-valuemax="18" aria-valuenow="10" />
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Auditable Multi-Year Growth & Inflation Curves</div>
       <div class="grid">
         <div class="form-group">
           <label for="paramBenefitY2">Year 2 Value Realization Scale Factor</label>
@@ -503,6 +437,105 @@
           <p style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Baseline: 1.10 (+10% cumulative run inflation)</p>
         </div>
       </div>
+    </div>
+
+    <div class="wizard-nav">
+      <button class="btn-action" onclick="goToStep(2)">⬅️ Previous Step</button>
+      <button class="btn-action btn-primary" onclick="goToStep(4)">Proceed to Step 4: Executive Decision Scorecard ➔</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: DECISION SCORECARD -->
+  <div id="step-4" class="step-content" role="tabpanel" aria-labelledby="stepBtn4">
+    <div class="help-box">
+      <strong>Step 4: Review Your AI Investment Decision Scorecard</strong><br />
+      Below is your synthesized financial scorecard, ROI returns, and official CFO Stage-Gate funding verdict.
+    </div>
+
+    <div class="scenario-pill-group">
+      <span style="font-size:0.8rem; color:var(--text-muted); align-self:center; margin-right:4px;">Quick Scenarios:</span>
+      <button class="scenario-pill active" id="scenBase">Base Case</button>
+      <button class="scenario-pill" id="scenCons">Conservative / Downside</button>
+      <button class="scenario-pill" id="scenAggr">Aggressive / Scale</button>
+    </div>
+
+    <div id="verdictBox" class="verdict-box">
+      <div id="verdictTitle" class="verdict-title">--</div>
+      <div id="verdictDesc" class="verdict-desc">--</div>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">
+          <span class="tooltip-wrap">3-Yr Net Present Value
+            <span class="tooltip-text">Present value of future net cash flows discounted at Hurdle Rate minus CapEx. Must be > $0.</span>
+          </span>
+        </div>
+        <div class="kpi-val" id="npvVal">--</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">
+          <span class="tooltip-wrap">Avg Return on Capital (ROIC)
+            <span class="tooltip-text">Average annual net cash flow over the horizon divided by upfront CapEx. Must clear Hurdle Rate.</span>
+          </span>
+        </div>
+        <div class="kpi-val" id="roicVal">--</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">
+          <span class="tooltip-wrap">Cumulative Payback
+            <span class="tooltip-text">Time in months/years required for cumulative cash inflows to recover upfront CapEx.</span>
+          </span>
+        </div>
+        <div class="kpi-val" id="paybackVal">--</div>
+      </div>
+    </div>
+
+    <!-- Hidden sliders for two-way sync -->
+    <div style="display:none;">
+      <input type="range" id="capex" min="25000" max="1000000" step="25000" value="260000" />
+      <span id="capexDisplay">$260,000</span>
+      <input type="range" id="opex" min="10000" max="400000" step="5000" value="50000" />
+      <span id="opexDisplay">$50,000</span>
+      <input type="range" id="benefit" min="50000" max="1000000" step="10000" value="234000" />
+      <span id="benefitDisplay">$234,000</span>
+      <input type="range" id="realization" min="20" max="100" step="5" value="70" />
+      <span id="realizationDisplay">70%</span>
+    </div>
+
+    <div class="wizard-nav">
+      <button class="btn-action" onclick="goToStep(3)">⬅️ Previous Step</button>
+      <button class="btn-action btn-primary" onclick="goToStep(5)">Proceed to Step 5: Sensitivity Stress Test ➔</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: SENSITIVITY STRESS TEST -->
+  <div id="step-5" class="step-content" role="tabpanel" aria-labelledby="stepBtn5">
+    <div class="help-box">
+      <strong>Step 5: Two-Way Sensitivity Stress Testing</strong><br />
+      Stress-test your business case across varying cost of capital rates (WACC) and hard cash realization rates to identify breakeven safety boundaries.
+    </div>
+
+    <div class="card">
+      <div class="card-title">2-Way Sensitivity Matrix (NPV vs. Hurdle & Realization)</div>
+      <table id="sensitivityTable">
+        <thead>
+          <tr>
+            <th>WACC \ Realization</th>
+            <th>35%</th>
+            <th>50%</th>
+            <th>65%</th>
+            <th>80%</th>
+            <th>95%</th>
+          </tr>
+        </thead>
+        <tbody id="sensitivityBody"></tbody>
+      </table>
+    </div>
+
+    <div class="wizard-nav">
+      <button class="btn-action" onclick="goToStep(4)">⬅️ Back to Decision Scorecard</button>
+      <button class="btn-action btn-primary" onclick="window.print()">🖨️ Print / Save Executive Summary PDF</button>
     </div>
   </div>
 
@@ -732,49 +765,27 @@
       const realEl = document.getElementById('calcRealizedValue');
       if (grossEl) grossEl.textContent = formatMoney(grossVal);
       if (realEl) realEl.textContent = formatMoney(realizedVal);
+
+      // Auto-sync to dashboard state
+      const capexIn = document.getElementById('capex');
+      const opexIn = document.getElementById('opex');
+      const benIn = document.getElementById('benefit');
+      const realIn = document.getElementById('realization');
+
+      if (capexIn) capexIn.value = totalCapex;
+      if (opexIn) opexIn.value = totalOpex;
+      if (benIn) benIn.value = grossVal;
+      if (realIn) realIn.value = safeNumber(document.getElementById('estCaptureType')?.value, 70);
+
+      const bbBuildCap = document.getElementById('bbBuildCapex');
+      const bbBuildOp = document.getElementById('bbBuildOpex');
+      if (bbBuildCap) bbBuildCap.value = totalCapex;
+      if (bbBuildOp) bbBuildOp.value = totalOpex;
+
+      calculate();
     } catch (err) {
       showError('Estimator error: ' + err.message);
     }
-  }
-
-  function applyEstimatesToDashboard() {
-    const devMonths = safeNumber(document.getElementById('estDevMonths')?.value, 0);
-    const consulting = safeNumber(document.getElementById('estConsulting')?.value, 0);
-    const dataPipes = safeNumber(document.getElementById('estDataPipelines')?.value, 0);
-    const totalCapex = (devMonths * 15000) + consulting + dataPipes;
-
-    const users = safeNumber(document.getElementById('estUsers')?.value, 0);
-    const costPerUser = safeNumber(document.getElementById('estCostPerUser')?.value, 0);
-    const adminOpex = safeNumber(document.getElementById('estAdminOpex')?.value, 0);
-    const totalOpex = (users * costPerUser * 12) + adminOpex;
-
-    const empCount = safeNumber(document.getElementById('estEmpCount')?.value, 0);
-    const hoursSaved = safeNumber(document.getElementById('estHoursSaved')?.value, 0);
-    const wage = safeNumber(document.getElementById('estHourlyWage')?.value, 0);
-    const grossVal = empCount * (hoursSaved * 52) * wage;
-    const realRate = safeNumber(document.getElementById('estCaptureType')?.value, 70);
-
-    const capexIn = document.getElementById('capex');
-    const opexIn = document.getElementById('opex');
-    const benIn = document.getElementById('benefit');
-    const realIn = document.getElementById('realization');
-
-    if (capexIn) capexIn.value = Math.min(1000000, Math.max(25000, totalCapex));
-    if (opexIn) opexIn.value = Math.min(400000, Math.max(10000, totalOpex));
-    if (benIn) benIn.value = Math.min(1000000, Math.max(50000, grossVal));
-    if (realIn) realIn.value = realRate;
-
-    const bbBuildCap = document.getElementById('bbBuildCapex');
-    const bbBuildOp = document.getElementById('bbBuildOpex');
-    if (bbBuildCap) bbBuildCap.value = totalCapex;
-    if (bbBuildOp) bbBuildOp.value = totalOpex;
-
-    updateFromSlider('capex');
-    updateFromSlider('opex');
-    updateFromSlider('benefit');
-    updateFromSlider('realization');
-
-    selectTab(document.getElementById('tabBtnDashboard'));
   }
 
   function runBuildBuy() {
@@ -880,25 +891,7 @@
       document.getElementById('realization').value = 85;
       document.getElementById('wacc').value = 8;
     }
-    ['capex', 'opex', 'benefit', 'realization', 'wacc'].forEach(id => updateFromSlider(id));
-  }
-
-  function updateFromSlider(id) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const val = el.value;
-    el.setAttribute('aria-valuenow', val);
-    
-    const disp = document.getElementById(id + 'Display');
-    if (disp) {
-      if (id === 'capex' || id === 'opex' || id === 'benefit') {
-        disp.textContent = formatMoney(Number(val));
-      } else if (id === 'realization' || id === 'wacc') {
-        disp.textContent = val + "%";
-      }
-    }
     calculate();
-    debouncedAutoSave();
   }
 
   function debouncedAutoSave() {
@@ -1017,53 +1010,59 @@
     }
   }
 
-  function selectTab(tabBtn) {
-    if (!tabBtn) return;
-    const targetPanelId = tabBtn.getAttribute('aria-controls');
+  // WIZARD STEPPER NAVIGATION
+  function selectStep(stepBtn) {
+    if (!stepBtn) return;
+    const targetPanelId = stepBtn.getAttribute('aria-controls');
     
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    document.querySelectorAll('.step-btn').forEach(btn => {
       btn.classList.remove('active');
       btn.setAttribute('aria-selected', 'false');
       btn.setAttribute('tabindex', '-1');
     });
 
-    document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.step-content').forEach(p => p.classList.remove('active'));
 
-    tabBtn.classList.add('active');
-    tabBtn.setAttribute('aria-selected', 'true');
-    tabBtn.setAttribute('tabindex', '0');
-    tabBtn.focus();
+    stepBtn.classList.add('active');
+    stepBtn.setAttribute('aria-selected', 'true');
+    stepBtn.setAttribute('tabindex', '0');
+    stepBtn.focus();
 
     const panel = document.getElementById(targetPanelId);
     if (panel) panel.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goToStep(stepNumber) {
+    const btn = document.getElementById(`stepBtn${stepNumber}`);
+    if (btn) selectStep(btn);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
     loadFromStorage();
 
-    const tabList = document.querySelector('.tabs');
-    const tabs = Array.from(document.querySelectorAll('.tab-btn'));
+    const stepButtons = Array.from(document.querySelectorAll('.step-btn'));
 
-    tabs.forEach((tab, index) => {
-      tab.addEventListener('click', () => selectTab(tab));
+    stepButtons.forEach((btn, index) => {
+      btn.addEventListener('click', () => selectStep(btn));
 
-      tab.addEventListener('keydown', (e) => {
+      btn.addEventListener('keydown', (e) => {
         let nextIndex = index;
         if (e.key === 'ArrowRight') {
-          nextIndex = (index + 1) % tabs.length;
+          nextIndex = (index + 1) % stepButtons.length;
           e.preventDefault();
         } else if (e.key === 'ArrowLeft') {
-          nextIndex = (index - 1 + tabs.length) % tabs.length;
+          nextIndex = (index - 1 + stepButtons.length) % stepButtons.length;
           e.preventDefault();
         } else if (e.key === 'Home') {
           nextIndex = 0;
           e.preventDefault();
         } else if (e.key === 'End') {
-          nextIndex = tabs.length - 1;
+          nextIndex = stepButtons.length - 1;
           e.preventDefault();
         }
         if (nextIndex !== index) {
-          selectTab(tabs[nextIndex]);
+          selectStep(stepButtons[nextIndex]);
         }
       });
     });
@@ -1072,9 +1071,6 @@
     document.getElementById('scenCons')?.addEventListener('click', () => loadScenario('conservative'));
     document.getElementById('scenAggr')?.addEventListener('click', () => loadScenario('aggressive'));
 
-    ['capex', 'opex', 'benefit', 'realization', 'wacc'].forEach(id => {
-      document.getElementById(id)?.addEventListener('input', () => updateFromSlider(id));
-    });
     document.getElementById('projectName')?.addEventListener('input', () => { calculate(); debouncedAutoSave(); });
     document.getElementById('stage')?.addEventListener('change', () => { calculate(); debouncedAutoSave(); });
 
@@ -1082,14 +1078,18 @@
       document.getElementById(id)?.addEventListener('input', runEstimators);
       document.getElementById(id)?.addEventListener('change', runEstimators);
     });
-    document.getElementById('btnApplyEstimates')?.addEventListener('click', applyEstimatesToDashboard);
 
     ['bbBuildCapex', 'bbBuildOpex', 'bbBuildRealization', 'bbBuyCapex', 'bbBuyOpex', 'bbBuyRealization'].forEach(id => {
       document.getElementById(id)?.addEventListener('input', runBuildBuy);
     });
 
-    ['paramBenefitY2', 'paramBenefitY3', 'paramOpexY2', 'paramOpexY3'].forEach(id => {
-      document.getElementById(id)?.addEventListener('input', calculate);
+    ['paramBenefitY2', 'paramBenefitY3', 'paramOpexY2', 'paramOpexY3', 'wacc'].forEach(id => {
+      document.getElementById(id)?.addEventListener('input', () => {
+        const waccEl = document.getElementById('wacc');
+        const disp = document.getElementById('waccDisplay');
+        if (disp && waccEl) disp.textContent = waccEl.value + '%';
+        calculate();
+      });
     });
 
     document.getElementById('btnSave')?.addEventListener('click', saveToStorage);
@@ -1098,7 +1098,6 @@
     document.getElementById('btnExportCSV')?.addEventListener('click', exportCSV);
     document.getElementById('btnPrint')?.addEventListener('click', () => window.print());
 
-    ['capex', 'opex', 'benefit', 'realization', 'wacc'].forEach(id => updateFromSlider(id));
     runEstimators();
   });
 </script>
