@@ -311,11 +311,6 @@
             <tbody id="sensitivityBody"></tbody>
           </table>
         </div>
-
-        <div class="card" style="text-align:center;">
-          <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:10px;">Discuss this evaluation with your professional network:</p>
-          <a class="btn-action btn-primary" href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">Share Feedback on LinkedIn</a>
-        </div>
       </div>
     </div>
   </div>
@@ -749,6 +744,7 @@
     }
   }
 
+  // Estimator Syncs to Dashboard and Build vs Buy
   function applyEstimatesToDashboard() {
     const devMonths = safeNumber(document.getElementById('estDevMonths')?.value, 0);
     const consulting = safeNumber(document.getElementById('estConsulting')?.value, 0);
